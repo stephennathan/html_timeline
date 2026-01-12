@@ -481,14 +481,35 @@ function spansOverlap(
   const bStartPercent = toPercent(b.startCol, b.startOffset);
 
   // Calculate text extent as percentage of timeline
-  const textPercent = estimateTextPercent(a.item.content, timelineWidthPx, compactStacking);
+  const aTextPercent = estimateTextPercent(a.item.content, timelineWidthPx, compactStacking);
 
-  // Effective end = bar end (or start for points) + text extent
-  const aBasePercent = a.item.isPoint ? aStartPercent : aEndPercent;
-  const aEffectiveEnd = aBasePercent + textPercent;
+  // For box/range items: text is inside the bar or flows outside to the right
+  // For point items: text flows to the right of the dot
+  let aEffectiveEnd: number;
+  if (a.item.isPoint) {
+    // Point: dot position + text extends to the right
+    aEffectiveEnd = aStartPercent + aTextPercent;
+  } else {
+    // Box/range item: check if text fits inside the bar
+    const barWidthPercent = aEndPercent - aStartPercent;
+    const textFitsInBar = barWidthPercent >= aTextPercent;
 
-  // Items overlap if a's effective end reaches or passes b's start
-  return aEffectiveEnd >= bStartPercent;
+    if (compactStacking && textFitsInBar) {
+      // Compact mode with text inside bar: just use bar end
+      aEffectiveEnd = aEndPercent;
+    } else {
+      // Text flows outside the bar (either narrow bar or normal mode)
+      // Account for text extending from the bar's end (or start if very narrow)
+      const textStartPercent = textFitsInBar ? aEndPercent : aStartPercent;
+      aEffectiveEnd = textStartPercent + aTextPercent;
+    }
+  }
+
+  // Minimum gap between items for visual clarity
+  const minGapPercent = (8 / timelineWidthPx) * 100; // 8px minimum gap
+
+  // Items overlap if a's effective end reaches b's start
+  return aEffectiveEnd + minGapPercent >= bStartPercent;
 }
 
 function stackItems(
@@ -790,18 +811,22 @@ function resolveOptions(
       item.end > max ? item.end : max, items[0]?.end || new Date());
   }
 
-  // Add padding to date range
-  const padding = daysBetween(start, end) * 0.05;
-  start = new Date(start.getTime() - padding * 86400000);
-  end = new Date(end.getTime() + padding * 86400000);
-
-  // Select granularity
+  // Select granularity first (needed for proper alignment)
   let granularity: TimeGranularity;
   if (!userOptions?.granularity || userOptions.granularity === 'auto') {
     granularity = selectGranularity(start, end);
   } else {
     granularity = userOptions.granularity;
   }
+
+  // Align dates to granularity boundaries, then add padding only at the end
+  // This prevents empty leading columns
+  const weekStartDay = userOptions?.weekStartDay ?? 0;
+  start = alignToGranularity(start, granularity, weekStartDay);
+
+  // For end date, align and then advance to include the last item fully
+  end = alignToGranularity(end, granularity, weekStartDay);
+  end = advanceByGranularity(end, granularity);
 
   // Parse group label width to pixels (assume px if number, parse if string)
   const groupLabelWidth = userOptions?.groupLabelWidth ?? '180px';
