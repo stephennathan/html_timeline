@@ -9,7 +9,7 @@ A TypeScript module that generates HTML table-based timelines using vis-timeline
 - **Multiple granularities** - Hour, day, week, month, quarter, year (or auto-detect)
 - **Grouped items** - Organize items into labeled groups/swimlanes
 - **Item types** - Box (range), point (milestone), and background items
-- **Smart stacking** - Each item on its own row by default
+- **Smart stacking** - Each item on its own row by default, with optional `order` field for explicit control
 - **Compact mode** - Items share rows when they don't overlap
 - **Responsive** - Adjusts to container width
 - **Customizable colors** - Built-in color classes with easy customization
@@ -200,6 +200,22 @@ For best results with compact stacking:
 - Pass `containerWidth` for accurate text width calculations
 - Stacking is consistent across all granularities (week, month, etc.)
 - Keep labels concise when possible
+
+### Controlling Stack Order
+
+Use the `order` property on items to control which items appear on earlier rows:
+
+```javascript
+const items = [
+  { id: 1, content: "High Priority", start: "2024-01-01", end: "2024-02-01", order: 1 },
+  { id: 2, content: "Medium Priority", start: "2024-01-15", end: "2024-02-15", order: 2 },
+  { id: 3, content: "Low Priority", start: "2024-02-01", end: "2024-03-01", order: 3 },
+];
+```
+
+- Items with lower `order` values appear on earlier/higher rows
+- Items without an `order` value stack normally based on start date
+- Within the same `order` value, items are sorted by start position and duration
 
 ## API
 

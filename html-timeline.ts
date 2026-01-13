@@ -38,6 +38,8 @@ export interface TimelineItem {
   style?: string;
   /** Title/tooltip text */
   title?: string;
+  /** Stacking order within group (lower = higher priority for earlier rows) */
+  order?: number;
 }
 
 /**
@@ -526,10 +528,17 @@ function stackItems(
 ): ItemSpan[][] {
   if (spans.length === 0) return [];
 
-  // Sort by start position (column + offset), then by duration (longer items first)
+  // Sort by order field first (lower order = earlier in stack), then by start position, then by duration
   const sorted = [...spans].sort((a, b) => {
+    // First sort by order field (lower order = earlier in stack)
+    const orderA = a.item.order ?? Infinity;
+    const orderB = b.item.order ?? Infinity;
+    if (orderA !== orderB) return orderA - orderB;
+
+    // Then by start position
     if (a.startCol !== b.startCol) return a.startCol - b.startCol;
     if (a.startOffset !== b.startOffset) return a.startOffset - b.startOffset;
+
     // Longer items first
     const aDuration = (a.endCol - a.startCol) * 100 + a.endOffset - a.startOffset;
     const bDuration = (b.endCol - b.startCol) * 100 + b.endOffset - b.startOffset;

@@ -31,6 +31,8 @@ export interface TimelineItem {
     style?: string;
     /** Title/tooltip text */
     title?: string;
+    /** Stacking order within group (lower = higher priority for earlier rows) */
+    order?: number;
 }
 /**
  * Timeline group - vis-timeline compatible structure

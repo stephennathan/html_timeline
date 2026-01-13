@@ -5,8 +5,16 @@ HTML Timeline Generator - A TypeScript module that generates HTML table-based ti
 
 ## Key Files
 - `html-timeline.ts` - Main TypeScript source module
-- `html-timeline.js` - Compiled ES module (keep in sync with .ts)
+- `html-timeline.js` - Compiled ES module (DO NOT edit directly - compile from .ts)
+- `html-timeline.d.ts` - TypeScript type declarations
 - `test-html-timeline.html` - Test/demo page with sample data
+
+## Build
+To compile TypeScript to JavaScript:
+```bash
+npx tsc html-timeline.ts --outDir . --declaration --module ES2020 --target ES2020 --moduleResolution node --esModuleInterop --strict
+```
+**Important:** Never edit `html-timeline.js` directly. Always edit `html-timeline.ts` and compile.
 
 ## Architecture
 
@@ -20,6 +28,7 @@ interface TimelineItem {
   type?: 'box' | 'point' | 'range' | 'background';
   group?: string | number;   // Group ID
   className?: string;        // CSS class for styling (e.g., 'success', 'purple')
+  order?: number;            // Stacking order (lower = higher priority for earlier rows)
 }
 
 interface TimelineGroup {
@@ -87,8 +96,8 @@ Creates a debounced resize handler. Returns `{ attach(), detach() }`.
 ## Common Tasks
 
 ### Modifying stacking behavior
-Edit `stackItems()` and `spansOverlap()` in both `.ts` and `.js` files. Key functions:
-- `stackItems()` - Controls row assignment (normal vs compact mode)
+Edit `stackItems()` and `spansOverlap()` in `html-timeline.ts`, then compile. Key functions:
+- `stackItems()` - Controls row assignment (normal vs compact mode), sorts by `order` field first
 - `spansOverlap()` - Determines if two items overlap using percentage-based positions
 - `estimateTextPercent()` - Calculates text width as percentage of timeline
 
