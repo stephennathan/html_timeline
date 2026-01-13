@@ -92,7 +92,7 @@
 </head>
 <body>
   <h1>HTML Timeline - Test Suite</h1>
-  <p class="subtitle">5 challenging test data sets to stress-test the timeline generator</p>
+  <p class="subtitle">6 challenging test data sets to stress-test the timeline generator</p>
 
   <div class="controls">
     <div class="control-group">
@@ -103,6 +103,7 @@
         <option value="3">3. Wide Date Range (Multi-Year)</option>
         <option value="4">4. Many Groups (15 Swimlanes)</option>
         <option value="5">5. Edge Cases & Boundaries</option>
+        <option value="6">6. Order Field (Stack Priority)</option>
       </select>
     </div>
     <div class="control-group">
@@ -143,6 +144,7 @@
     import * as testData3 from './test-data-3-wide-date-range.js';
     import * as testData4 from './test-data-4-many-groups.js';
     import * as testData5 from './test-data-5-edge-cases.js';
+    import * as testData6 from './test-data-6-order-field.js';
 
     const testDataSets = {
       '1': testData1,
@@ -150,6 +152,7 @@
       '3': testData3,
       '4': testData4,
       '5': testData5,
+      '6': testData6,
     };
 
     let currentTimeline = null;
