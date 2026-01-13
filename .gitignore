@@ -30,8 +30,6 @@ Thumbs.db
 *.swo
 *~
 
-# Testing
-test/
 
 # Misc
 *.tgz
@@ -40,4 +38,4 @@ test/
 frontend/mockups/%      
 
 
-*.js
+html-timeline.js
