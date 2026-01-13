@@ -203,29 +203,29 @@ For best results with compact stacking:
 
 ## API
 
-### `mountTimeline(container, items, groups, options?): MountedTimeline`
+`mountTimeline(container, items, groups, options?): MountedTimeline`
 Mounts a timeline with full setup (styles, rendering, resize handling).
 Returns an object with `render()`, `update(options)`, `destroy()`, and `getOptions()` methods.
 
-### `renderTimelineToString(items, groups, options?): string`
+`renderTimelineToString(items, groups, options?): string`
 Renders timeline to HTML string.
 
-### `renderTimeline(items, groups, options?): HTMLTableElement`
+`renderTimeline(items, groups, options?): HTMLTableElement`
 Renders timeline to DOM element (browser only).
 
-### `getTimelineStyles(prefix?): string`
+`getTimelineStyles(prefix?): string`
 Returns default CSS styles.
 
-### `injectStyles(prefix?, styleId?): HTMLStyleElement`
+`injectStyles(prefix?, styleId?): HTMLStyleElement`
 Injects timeline CSS into the document head.
 
-### `fixOverflowingText(container?, prefix?): void`
+ `fixOverflowingText(container?, prefix?): void`
 Moves text outside box items when it doesn't fit inside.
 
-### `createResizeHandler(callback, delay?): { attach, detach }`
+ `createResizeHandler(callback, delay?): { attach, detach }`
 Creates a debounced resize handler with attach/detach methods.
 
-### `exportTimelineToPptx(container, pptx, options?): slide`
+ `exportTimelineToPptx(container, pptx, options?): slide`
 Exports a rendered timeline to PowerPoint. Requires pptxgenjs.
 
 ## PowerPoint Export
