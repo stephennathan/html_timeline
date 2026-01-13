@@ -173,6 +173,25 @@ export declare function createResizeHandler(callback: () => void, delay?: number
  * ```
  */
 export declare function mountTimeline(container: HTMLElement | string, items: TimelineItem[], groups: TimelineGroup[], options?: MountOptions): MountedTimeline;
+export interface PptxExportOptions {
+    title?: string;
+    slideWidth?: number;
+    slideHeight?: number;
+    margin?: number;
+    titleHeight?: number;
+    prefix?: string;
+}
+/**
+ * Export a rendered timeline to PowerPoint using pptxgenjs.
+ * Requires pptxgenjs to be loaded (e.g., via CDN or npm).
+ *
+ * @param container - The container element or selector containing the rendered timeline
+ * @param pptx - A PptxGenJS instance
+ * @param options - Export options
+ * @returns The slide that was created
+ */
+export declare function exportTimelineToPptx(container: HTMLElement | string, pptx: any, // PptxGenJS instance
+options?: PptxExportOptions): any;
 declare const _default: {
     renderTimeline: typeof renderTimeline;
     renderTimelineToString: typeof renderTimelineToString;
@@ -181,5 +200,6 @@ declare const _default: {
     injectStyles: typeof injectStyles;
     createResizeHandler: typeof createResizeHandler;
     mountTimeline: typeof mountTimeline;
+    exportTimelineToPptx: typeof exportTimelineToPptx;
 };
 export default _default;

@@ -256,9 +256,9 @@ function selectGranularity(start: Date, end: Date): TimeGranularity {
   const days = daysBetween(start, end);
 
   if (days <= 3) return 'hour';
-  if (days <= 60) return 'day';
-  if (days <= 180) return 'week';
-  if (days <= 730) return 'month';
+  if (days <= 14) return 'day';    // Up to 2 weeks: daily
+  if (days <= 90) return 'week';   // Up to 3 months: weekly
+  if (days <= 730) return 'month'; // Up to 2 years: monthly
   if (days <= 1825) return 'quarter';
   return 'year';
 }
@@ -1362,6 +1362,319 @@ export function mountTimeline(
 }
 
 // ============================================================================
+// PPTX EXPORT
+// ============================================================================
+
+// Color map for item classes
+const pptxColorMap: Record<string, { fill: string; border: string }> = {
+  default: { fill: '0969da', border: '0550ae' },
+  success: { fill: '1a7f37', border: '116329' },
+  warning: { fill: 'bf8700', border: '9a6700' },
+  danger: { fill: 'cf222e', border: 'a40e26' },
+  info: { fill: '0550ae', border: '033d8b' },
+  purple: { fill: '8250df', border: '6639ba' },
+  pink: { fill: 'bf3989', border: '99286e' },
+  orange: { fill: 'ea580c', border: 'c2410c' },
+};
+
+function getItemColor(classList: DOMTokenList): { fill: string; border: string } {
+  for (const colorName of Object.keys(pptxColorMap)) {
+    if (colorName !== 'default' && classList.contains(colorName)) {
+      return pptxColorMap[colorName];
+    }
+  }
+  return pptxColorMap.default;
+}
+
+export interface PptxExportOptions {
+  title?: string;
+  slideWidth?: number;
+  slideHeight?: number;
+  margin?: number;
+  titleHeight?: number;
+  prefix?: string;
+}
+
+/**
+ * Export a rendered timeline to PowerPoint using pptxgenjs.
+ * Requires pptxgenjs to be loaded (e.g., via CDN or npm).
+ *
+ * @param container - The container element or selector containing the rendered timeline
+ * @param pptx - A PptxGenJS instance
+ * @param options - Export options
+ * @returns The slide that was created
+ */
+export function exportTimelineToPptx(
+  container: HTMLElement | string,
+  pptx: any, // PptxGenJS instance
+  options: PptxExportOptions = {}
+): any {
+  const containerEl = typeof container === 'string'
+    ? document.querySelector<HTMLElement>(container)
+    : container;
+
+  if (!containerEl) {
+    throw new Error(`Timeline container not found: ${container}`);
+  }
+
+  const table = containerEl.querySelector('table');
+  if (!table) {
+    throw new Error('No timeline table found in container');
+  }
+
+  const {
+    title = 'Timeline',
+    slideWidth = 13.33,
+    slideHeight = 7.5,
+    margin = 0.3,
+    titleHeight = 0.6,
+    prefix = 'tl',
+  } = options;
+
+  const slide = pptx.addSlide();
+
+  // Add title
+  slide.addText(title, {
+    x: margin,
+    y: margin,
+    w: slideWidth - 2 * margin,
+    h: titleHeight,
+    fontSize: 16,
+    bold: true,
+    color: '24292f',
+  });
+
+  // Get table dimensions from DOM
+  const tableRect = table.getBoundingClientRect();
+  const tableW = tableRect.width;
+  const tableH = tableRect.height;
+
+  // Calculate scale to fit on slide
+  const availW = slideWidth - 2 * margin;
+  const availH = slideHeight - titleHeight - 2 * margin;
+  const scale = Math.min(availW / tableW, availH / tableH, 1);
+
+  const pptxTableW = tableW * scale;
+  const pptxTableH = tableH * scale;
+  const tableX = margin;
+  const tableY = margin + titleHeight + 0.2;
+
+  // Helper: convert px to inches on slide
+  const toInchX = (px: number) => tableX + (px / tableW) * pptxTableW;
+  const toInchY = (py: number) => tableY + (py / tableH) * pptxTableH;
+  const toInchW = (pw: number) => (pw / tableW) * pptxTableW;
+  const toInchH = (ph: number) => (ph / tableH) * pptxTableH;
+
+  // Process header row
+  const headerRow = table.querySelector('thead tr');
+  if (headerRow) {
+    const headerRect = headerRow.getBoundingClientRect();
+    const headerY = headerRect.top - tableRect.top;
+    const headerH = headerRect.height;
+
+    // Header background
+    slide.addShape(pptx.ShapeType.rect, {
+      x: tableX,
+      y: toInchY(headerY),
+      w: pptxTableW,
+      h: toInchH(headerH),
+      fill: { color: 'f6f8fa' },
+      line: { color: 'd0d7de', pt: 0.5 },
+    });
+
+    // Header cells text
+    headerRow.querySelectorAll('th').forEach((th) => {
+      const thRect = th.getBoundingClientRect();
+      const cellX = thRect.left - tableRect.left;
+      const cellW = thRect.width;
+
+      slide.addText(th.textContent || '', {
+        x: toInchX(cellX),
+        y: toInchY(headerY),
+        w: toInchW(cellW),
+        h: toInchH(headerH),
+        fontSize: 8,
+        bold: true,
+        color: '24292f',
+        align: 'center',
+        valign: 'middle',
+      });
+    });
+  }
+
+  // Process body rows
+  const bodyRows = table.querySelectorAll('tbody tr');
+  bodyRows.forEach((row, rowIdx) => {
+    const rowRect = row.getBoundingClientRect();
+    const rowY = rowRect.top - tableRect.top;
+    const rowH = rowRect.height;
+
+    // Row background
+    const bgColor = rowIdx % 2 === 0 ? 'FFFFFF' : 'f6f8fa';
+    slide.addShape(pptx.ShapeType.rect, {
+      x: tableX,
+      y: toInchY(rowY),
+      w: pptxTableW,
+      h: toInchH(rowH),
+      fill: { color: bgColor },
+      line: { color: 'eaeef2', pt: 0.25 },
+    });
+
+    // Group label
+    const groupLabel = row.querySelector(`.${prefix}-group-label`);
+    if (groupLabel) {
+      const labelRect = groupLabel.getBoundingClientRect();
+      const labelX = labelRect.left - tableRect.left;
+      const labelW = labelRect.width;
+
+      slide.addShape(pptx.ShapeType.rect, {
+        x: toInchX(labelX),
+        y: toInchY(rowY),
+        w: toInchW(labelW),
+        h: toInchH(rowH),
+        fill: { color: 'f6f8fa' },
+        line: { color: 'd0d7de', pt: 0.5 },
+      });
+
+      slide.addText(groupLabel.textContent || '', {
+        x: toInchX(labelX) + 0.05,
+        y: toInchY(rowY),
+        w: toInchW(labelW) - 0.1,
+        h: toInchH(rowH),
+        fontSize: 8,
+        bold: true,
+        color: '24292f',
+        valign: 'middle',
+      });
+    }
+  });
+
+  // Draw vertical date dividers
+  const firstBodyRow = bodyRows[0];
+  if (firstBodyRow && headerRow) {
+    const firstRowRect = firstBodyRow.getBoundingClientRect();
+    const lastRowRect = bodyRows[bodyRows.length - 1].getBoundingClientRect();
+    const gridStartY = firstRowRect.top - tableRect.top;
+    const gridEndY = lastRowRect.bottom - tableRect.top;
+
+    headerRow.querySelectorAll('th').forEach((th, idx) => {
+      if (idx === 0) return; // Skip group label column
+
+      const thRect = th.getBoundingClientRect();
+      const cellX = thRect.left - tableRect.left;
+
+      slide.addShape(pptx.ShapeType.line, {
+        x: toInchX(cellX),
+        y: toInchY(gridStartY),
+        w: 0,
+        h: toInchH(gridEndY - gridStartY),
+        line: { color: 'eaeef2', pt: 0.5 },
+      });
+    });
+
+    // Right edge of last column
+    const lastTh = headerRow.querySelector('th:last-child');
+    if (lastTh) {
+      const lastThRect = lastTh.getBoundingClientRect();
+      const rightEdge = lastThRect.right - tableRect.left;
+      slide.addShape(pptx.ShapeType.line, {
+        x: toInchX(rightEdge),
+        y: toInchY(gridStartY),
+        w: 0,
+        h: toInchH(gridEndY - gridStartY),
+        line: { color: 'eaeef2', pt: 0.5 },
+      });
+    }
+  }
+
+  // Draw timeline items
+  bodyRows.forEach((row) => {
+    row.querySelectorAll(`.${prefix}-item`).forEach((item) => {
+      const itemRect = item.getBoundingClientRect();
+      const itemX = itemRect.left - tableRect.left;
+      const itemY = itemRect.top - tableRect.top;
+      const itemW = itemRect.width;
+      const itemH = itemRect.height;
+
+      const isPoint = item.classList.contains(`${prefix}-item--point`);
+      const colors = getItemColor(item.classList);
+      const contentEl = item.querySelector(`.${prefix}-item-content`);
+      const content = contentEl?.textContent || '';
+
+      if (isPoint) {
+        // Point item: draw circle
+        const dotSize = 0.12;
+        const dotX = toInchX(itemX);
+        const dotCenterY = toInchY(itemY) + toInchH(itemH) / 2;
+
+        slide.addShape(pptx.ShapeType.ellipse, {
+          x: dotX,
+          y: dotCenterY - dotSize / 2,
+          w: dotSize,
+          h: dotSize,
+          fill: { color: colors.fill },
+          line: { color: colors.border, pt: 1.5 },
+        });
+
+        // Text next to dot
+        const textX = dotX + dotSize;
+        const textW = 4;
+
+        slide.addText(content, {
+          x: textX,
+          y: dotCenterY - 0.1,
+          w: textW,
+          h: 0.2,
+          fontSize: 8,
+          color: '24292f',
+          valign: 'middle',
+        });
+      } else {
+        // Box/range item
+        slide.addShape(pptx.ShapeType.rect, {
+          x: toInchX(itemX),
+          y: toInchY(itemY),
+          w: Math.max(toInchW(itemW), 0.1),
+          h: toInchH(itemH),
+          fill: { color: colors.fill },
+          line: { color: colors.border, pt: 0.75 },
+          rectRadius: 0.03,
+        });
+
+        const textOutside = item.classList.contains(`${prefix}-item--text-outside`);
+
+        if (textOutside) {
+          const boxTextX = toInchX(itemX) + toInchW(itemW);
+          const boxTextW = 4;
+
+          slide.addText(content, {
+            x: boxTextX,
+            y: toInchY(itemY),
+            w: boxTextW,
+            h: toInchH(itemH),
+            fontSize: 8,
+            color: '24292f',
+            valign: 'middle',
+          });
+        } else {
+          slide.addText(content, {
+            x: toInchX(itemX),
+            y: toInchY(itemY),
+            w: Math.max(toInchW(itemW) - 0.06, 0.1),
+            h: toInchH(itemH),
+            fontSize: 8,
+            color: 'FFFFFF',
+            valign: 'middle',
+          });
+        }
+      }
+    });
+  });
+
+  return slide;
+}
+
+// ============================================================================
 // CONVENIENCE EXPORTS
 // ============================================================================
 
@@ -1373,4 +1686,5 @@ export default {
   injectStyles,
   createResizeHandler,
   mountTimeline,
+  exportTimelineToPptx,
 };
