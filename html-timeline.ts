@@ -367,6 +367,7 @@ function generateTimeCells(
 function findCellIndex(date: Date, timeCells: TimeCell[], inclusive: boolean = false): number {
   for (let i = 0; i < timeCells.length; i++) {
     const cell = timeCells[i];
+    if (!cell) continue;
     if (inclusive) {
       if (date >= cell.start && date <= cell.end) return i;
     } else {
@@ -375,8 +376,10 @@ function findCellIndex(date: Date, timeCells: TimeCell[], inclusive: boolean = f
   }
 
   if (timeCells.length > 0) {
-    if (date < timeCells[0].start) return 0;
-    if (date >= timeCells[timeCells.length - 1].end) return timeCells.length - 1;
+    const firstCell = timeCells[0];
+    const lastCell = timeCells[timeCells.length - 1];
+    if (firstCell && date < firstCell.start) return 0;
+    if (lastCell && date >= lastCell.end) return timeCells.length - 1;
   }
 
   return -1;
@@ -406,6 +409,8 @@ function calculateItemSpan(item: NormalizedItem, timeCells: TimeCell[]): ItemSpa
 
   const startCell = timeCells[startCellIndex];
   const endCell = timeCells[endCellIndex];
+
+  if (!startCell || !endCell) return null;
 
   const startOffset = calculateOffsetPercent(item.start, startCell.start, startCell.end);
   const endOffset = calculateOffsetPercent(item.end, endCell.start, endCell.end);
@@ -550,11 +555,13 @@ function stackItems(
     let placed = false;
 
     for (let row = 0; row < Math.min(stacks.length, maxDepth); row++) {
-      const canPlace = stacks[row].every(existing => !spansOverlap(span, existing, compactStacking, timelineWidthPx, numCells));
+      const stackRow = stacks[row];
+      if (!stackRow) continue;
+      const canPlace = stackRow.every(existing => !spansOverlap(span, existing, compactStacking, timelineWidthPx, numCells));
 
       if (canPlace) {
         span.stackRow = row;
-        stacks[row].push(span);
+        stackRow.push(span);
         placed = true;
         break;
       }
@@ -775,8 +782,10 @@ function renderTable(
 
   let rows = '';
   for (let i = 0; i < groups.length; i++) {
-    const groupSpans = allSpans.filter(s => s.item.group === groups[i].id);
-    rows += renderGroupRow(groups[i], groupSpans, timeCells, options, i, timelineWidthPx);
+    const group = groups[i];
+    if (!group) continue;
+    const groupSpans = allSpans.filter(s => s.item.group === group.id);
+    rows += renderGroupRow(group, groupSpans, timeCells, options, i, timelineWidthPx);
   }
 
   return `<table class="${cls(prefix, 'table')}">
@@ -833,7 +842,7 @@ function resolveOptions(
   let groupLabelWidthPx = 180;
   if (typeof groupLabelWidth === 'string') {
     const match = groupLabelWidth.match(/^(\d+)/);
-    if (match) {
+    if (match && match[1]) {
       groupLabelWidthPx = parseInt(match[1], 10);
     }
   }
@@ -1377,13 +1386,16 @@ const pptxColorMap: Record<string, { fill: string; border: string }> = {
   orange: { fill: 'ea580c', border: 'c2410c' },
 };
 
+const DEFAULT_ITEM_COLOR = { fill: '0969da', border: '0550ae' };
+
 function getItemColor(classList: DOMTokenList): { fill: string; border: string } {
   for (const colorName of Object.keys(pptxColorMap)) {
     if (colorName !== 'default' && classList.contains(colorName)) {
-      return pptxColorMap[colorName];
+      const color = pptxColorMap[colorName];
+      if (color) return color;
     }
   }
-  return pptxColorMap.default;
+  return pptxColorMap.default ?? DEFAULT_ITEM_COLOR;
 }
 
 export interface PptxExportOptions {
@@ -1551,9 +1563,10 @@ export function exportTimelineToPptx(
 
   // Draw vertical date dividers
   const firstBodyRow = bodyRows[0];
-  if (firstBodyRow && headerRow) {
+  const lastBodyRow = bodyRows[bodyRows.length - 1];
+  if (firstBodyRow && lastBodyRow && headerRow) {
     const firstRowRect = firstBodyRow.getBoundingClientRect();
-    const lastRowRect = bodyRows[bodyRows.length - 1].getBoundingClientRect();
+    const lastRowRect = lastBodyRow.getBoundingClientRect();
     const gridStartY = firstRowRect.top - tableRect.top;
     const gridEndY = lastRowRect.bottom - tableRect.top;
 
