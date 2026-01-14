@@ -1473,7 +1473,8 @@ export function exportTimelineToPptx(
   // Calculate scale to fit on slide
   const availW = slideWidth - 2 * margin;
   const availH = slideHeight - titleHeight - 2 * margin;
-  const scale = Math.min(availW / tableW, availH / tableH, 1);
+//  const scale = Math.min(availW / tableW, availH / tableH, 1);
+  const scale = availW / tableW; // allow full width export
 
   const pptxTableW = tableW * scale;
   const pptxTableH = tableH * scale;
