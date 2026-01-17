@@ -1855,6 +1855,7 @@ export function exportTimelineToPptx(
       const itemH = itemRect.height;
 
       const isPoint = item.classList.contains(`${prefix}-item--point`);
+      const isLabelLeft = item.classList.contains(`${prefix}-item--label-left`);
       const colors = getItemColor(item.classList);
       const contentEl = item.querySelector(`.${prefix}-item-content`);
       const content = contentEl?.textContent || '';
@@ -1874,19 +1875,33 @@ export function exportTimelineToPptx(
           line: { color: colors.border, pt: 1.5 },
         });
 
-        // Text next to dot
-        const textX = dotX + dotSize;
+        // Text next to dot - position based on label-left
         const textW = 4;
-
-        slide.addText(content, {
-          x: textX,
-          y: dotCenterY - 0.1,
-          w: textW,
-          h: 0.2,
-          fontSize: 8,
-          color: '24292f',
-          valign: 'middle',
-        });
+        if (isLabelLeft) {
+          // Text to the left of the dot, right-aligned
+          slide.addText(content, {
+            x: dotX - textW,
+            y: dotCenterY - 0.1,
+            w: textW,
+            h: 0.2,
+            fontSize: 8,
+            color: '24292f',
+            valign: 'middle',
+            align: 'right',
+          });
+        } else {
+          // Text to the right of the dot (default)
+          const textX = dotX + dotSize;
+          slide.addText(content, {
+            x: textX,
+            y: dotCenterY - 0.1,
+            w: textW,
+            h: 0.2,
+            fontSize: 8,
+            color: '24292f',
+            valign: 'middle',
+          });
+        }
       } else {
         // Box/range item
         slide.addShape(pptx.ShapeType.rect, {
@@ -1901,20 +1916,35 @@ export function exportTimelineToPptx(
 
         const textOutside = item.classList.contains(`${prefix}-item--text-outside`);
 
-        if (textOutside) {
-          const boxTextX = toInchX(itemX) + toInchW(itemW);
+        if (textOutside || isLabelLeft) {
+          // Text outside the bar
           const boxTextW = 4;
-
-          slide.addText(content, {
-            x: boxTextX,
-            y: toInchY(itemY),
-            w: boxTextW,
-            h: toInchH(itemH),
-            fontSize: 8,
-            color: '24292f',
-            valign: 'middle',
-          });
+          if (isLabelLeft) {
+            // Text to the left of the bar, right-aligned
+            slide.addText(content, {
+              x: toInchX(itemX) - boxTextW,
+              y: toInchY(itemY),
+              w: boxTextW,
+              h: toInchH(itemH),
+              fontSize: 8,
+              color: '24292f',
+              valign: 'middle',
+              align: 'right',
+            });
+          } else {
+            // Text to the right of the bar (default text-outside behavior)
+            slide.addText(content, {
+              x: toInchX(itemX) + toInchW(itemW),
+              y: toInchY(itemY),
+              w: boxTextW,
+              h: toInchH(itemH),
+              fontSize: 8,
+              color: '24292f',
+              valign: 'middle',
+            });
+          }
         } else {
+          // Text inside the bar
           slide.addText(content, {
             x: toInchX(itemX),
             y: toInchY(itemY),
