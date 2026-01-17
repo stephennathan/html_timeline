@@ -230,8 +230,10 @@ function formatDateLabel(date: Date, granularity: TimeGranularity, locale: strin
     case 'day':
       return date.toLocaleDateString(locale, { day: 'numeric', month: 'short' });
     case 'week':
-      const weekNum = getWeekNumber(date);
-      return `W${weekNum}`;
+      // Format as w/c d/mm (week commencing)
+      const day = date.getDate();
+      const month = date.getMonth() + 1;
+      return `w/c ${day}/${month}`;
     case 'month':
       return date.toLocaleDateString(locale, { month: 'short' });
     case 'quarter':
@@ -240,14 +242,6 @@ function formatDateLabel(date: Date, granularity: TimeGranularity, locale: strin
     case 'year':
       return date.getFullYear().toString();
   }
-}
-
-function getWeekNumber(date: Date): number {
-  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-  const dayNum = d.getUTCDay() || 7;
-  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-  return Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
 }
 
 // ============================================================================
@@ -360,6 +354,70 @@ function generateTimeCells(
   }
 
   return cells;
+}
+
+// ============================================================================
+// HEADER GROUPING (for two-row headers)
+// ============================================================================
+
+interface HeaderGroup {
+  label: string;
+  startIndex: number;
+  span: number;
+}
+
+/**
+ * Generate header groups for two-row headers.
+ * - Month/Quarter mode: groups by year
+ * - Day mode: groups by week commencing
+ */
+function generateHeaderGroups(
+  timeCells: TimeCell[],
+  granularity: TimeGranularity,
+  weekStartDay: number
+): HeaderGroup[] {
+  const groups: HeaderGroup[] = [];
+
+  if (granularity === 'month' || granularity === 'quarter') {
+    // Group by year
+    let currentYear: number | null = null;
+    let currentGroup: HeaderGroup | null = null;
+
+    timeCells.forEach((cell, index) => {
+      const year = cell.start.getFullYear();
+      if (year !== currentYear) {
+        if (currentGroup) groups.push(currentGroup);
+        currentGroup = { label: year.toString(), startIndex: index, span: 1 };
+        currentYear = year;
+      } else if (currentGroup) {
+        currentGroup.span++;
+      }
+    });
+    if (currentGroup) groups.push(currentGroup);
+  } else if (granularity === 'day') {
+    // Group by week commencing
+    let currentWeekStart: number | null = null;
+    let currentGroup: HeaderGroup | null = null;
+
+    timeCells.forEach((cell, index) => {
+      const weekStart = alignToGranularity(cell.start, 'week', weekStartDay);
+      const weekStartTime = weekStart.getTime();
+
+      if (weekStartTime !== currentWeekStart) {
+        if (currentGroup) groups.push(currentGroup);
+        // Format as w/c d/mm
+        const day = weekStart.getDate();
+        const month = weekStart.getMonth() + 1;
+        currentGroup = { label: `w/c ${day}/${month}`, startIndex: index, span: 1 };
+        currentWeekStart = weekStartTime;
+      } else if (currentGroup) {
+        currentGroup.span++;
+      }
+    });
+    if (currentGroup) groups.push(currentGroup);
+  }
+
+  return groups;
 }
 
 // ============================================================================
@@ -755,11 +813,35 @@ function renderHeader(
   timeCells: TimeCell[],
   options: ResolvedOptions
 ): string {
-  const { classPrefix: prefix, showGroupLabels, groupLabelWidth } = options;
+  const { classPrefix: prefix, showGroupLabels, groupLabelWidth, granularity, weekStartDay } = options;
 
+  // Check if we need a grouped header row (year for month/quarter, w/c for day)
+  const needsGroupRow = granularity === 'month' || granularity === 'quarter' || granularity === 'day';
+  const groups = needsGroupRow ? generateHeaderGroups(timeCells, granularity, weekStartDay) : [];
+
+  let headerHtml = '';
+
+  // Render group row (years for month/quarter, w/c for day)
+  if (needsGroupRow && groups.length > 0) {
+    let groupCells = '';
+
+    if (showGroupLabels) {
+      const widthStyle = groupLabelWidth ? ` style="width: ${groupLabelWidth}"` : '';
+      groupCells += `<th class="${cls(prefix, 'group-label', 'header-label', 'header-group')}"${widthStyle} rowspan="2"></th>`;
+    }
+
+    for (const group of groups) {
+      groupCells += `<th class="${cls(prefix, 'header-cell', 'header-group-cell')}" colspan="${group.span}">${escapeHtml(group.label)}</th>`;
+    }
+
+    headerHtml += `<tr class="${cls(prefix, 'header', 'header-group-row')}">${groupCells}</tr>`;
+  }
+
+  // Render main header row
   let cells = '';
 
-  if (showGroupLabels) {
+  // Only add group label cell if we don't have a group row (it uses rowspan="2")
+  if (showGroupLabels && !needsGroupRow) {
     const widthStyle = groupLabelWidth ? ` style="width: ${groupLabelWidth}"` : '';
     cells += `<th class="${cls(prefix, 'group-label', 'header-label')}"${widthStyle}></th>`;
   }
@@ -768,7 +850,9 @@ function renderHeader(
     cells += `<th class="${cls(prefix, 'header-cell')}">${escapeHtml(cell.label)}</th>`;
   }
 
-  return `<tr class="${cls(prefix, 'header')}">${cells}</tr>`;
+  headerHtml += `<tr class="${cls(prefix, 'header')}">${cells}</tr>`;
+
+  return headerHtml;
 }
 
 function renderTable(
@@ -1002,6 +1086,24 @@ export function getTimelineStyles(prefix: string = 'tl'): string {
   padding-left: 12px;
   font-weight: 600;
   color: #57606a;
+}
+
+/* Header group row (years for month/quarter, week commencing for day) */
+.${prefix}-header-group-row {
+  background-color: #eaeef2;
+}
+
+.${prefix}-header-group-cell {
+  padding: 6px 4px;
+  text-align: center;
+  font-weight: 700;
+  border: 1px solid #d0d7de;
+  color: #24292f;
+  font-size: 11px;
+}
+
+.${prefix}-header-group {
+  vertical-align: middle;
 }
 
 /* Group Label */
@@ -1487,20 +1589,23 @@ export function exportTimelineToPptx(
   const toInchW = (pw: number) => (pw / tableW) * pptxTableW;
   const toInchH = (ph: number) => (ph / tableH) * pptxTableH;
 
-  // Process header row
-  const headerRow = table.querySelector('thead tr');
-  if (headerRow) {
+  // Process header rows (may have 1 or 2 rows for grouped headers)
+  const headerRows = table.querySelectorAll('thead tr');
+  headerRows.forEach((headerRow) => {
     const headerRect = headerRow.getBoundingClientRect();
     const headerY = headerRect.top - tableRect.top;
     const headerH = headerRect.height;
 
-    // Header background
+    // Header background - use darker color for group row
+    const isGroupRow = headerRow.classList.contains(`${prefix}-header-group-row`);
+    const bgColor = isGroupRow ? 'eaeef2' : 'f6f8fa';
+
     slide.addShape(pptx.ShapeType.rect, {
       x: tableX,
       y: toInchY(headerY),
       w: pptxTableW,
       h: toInchH(headerH),
-      fill: { color: 'f6f8fa' },
+      fill: { color: bgColor },
       line: { color: 'd0d7de', pt: 0.5 },
     });
 
@@ -1509,20 +1614,22 @@ export function exportTimelineToPptx(
       const thRect = th.getBoundingClientRect();
       const cellX = thRect.left - tableRect.left;
       const cellW = thRect.width;
+      const cellH = thRect.height;
+      const cellY = thRect.top - tableRect.top;
 
       slide.addText(th.textContent || '', {
         x: toInchX(cellX),
-        y: toInchY(headerY),
+        y: toInchY(cellY),
         w: toInchW(cellW),
-        h: toInchH(headerH),
-        fontSize: 8,
+        h: toInchH(cellH),
+        fontSize: isGroupRow ? 9 : 8,
         bold: true,
         color: '24292f',
         align: 'center',
         valign: 'middle',
       });
     });
-  }
+  });
 
   // Process body rows
   const bodyRows = table.querySelectorAll('tbody tr');
@@ -1574,13 +1681,15 @@ export function exportTimelineToPptx(
   // Draw vertical date dividers
   const firstBodyRow = bodyRows[0];
   const lastBodyRow = bodyRows[bodyRows.length - 1];
-  if (firstBodyRow && lastBodyRow && headerRow) {
+  // Use the last header row (main date labels, not group row) for column positions
+  const mainHeaderRow = headerRows[headerRows.length - 1];
+  if (firstBodyRow && lastBodyRow && mainHeaderRow) {
     const firstRowRect = firstBodyRow.getBoundingClientRect();
     const lastRowRect = lastBodyRow.getBoundingClientRect();
     const gridStartY = firstRowRect.top - tableRect.top;
     const gridEndY = lastRowRect.bottom - tableRect.top;
 
-    headerRow.querySelectorAll('th').forEach((th, idx) => {
+    mainHeaderRow.querySelectorAll('th').forEach((th: Element, idx: number) => {
       if (idx === 0) return; // Skip group label column
 
       const thRect = th.getBoundingClientRect();
@@ -1596,7 +1705,7 @@ export function exportTimelineToPptx(
     });
 
     // Right edge of last column
-    const lastTh = headerRow.querySelector('th:last-child');
+    const lastTh = mainHeaderRow.querySelector('th:last-child');
     if (lastTh) {
       const lastThRect = lastTh.getBoundingClientRect();
       const rightEdge = lastThRect.right - tableRect.left;
