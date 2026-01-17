@@ -58,6 +58,9 @@ export interface TimelineGroup {
   style?: string;
 }
 
+/** Label position behavior for items extending past timeline end */
+export type LabelPosition = 'auto' | 'right';
+
 /**
  * Timeline configuration options
  */
@@ -98,6 +101,13 @@ export interface TimelineOptions {
    * to different screen sizes.
    */
   containerWidth?: number;
+  /**
+   * Label position behavior for items near the end of the timeline.
+   * - 'auto' (default): Labels that would extend past the timeline end are
+   *   positioned to the left of the bar/point, right-aligned with the same gap spacing.
+   * - 'right': Labels always positioned to the right (original behavior).
+   */
+  labelPosition?: LabelPosition;
 }
 
 // Internal types
@@ -128,6 +138,8 @@ interface ItemSpan {
   startOffset: number;
   endOffset: number;
   stackRow: number;
+  /** Whether label should be positioned to the left of the bar/point */
+  labelLeft: boolean;
 }
 
 interface ResolvedOptions {
@@ -145,6 +157,7 @@ interface ResolvedOptions {
   groupOrder: 'value' | 'content' | 'id';
   compactStacking: boolean;
   containerWidth: number | null;
+  labelPosition: LabelPosition;
 }
 
 // ============================================================================
@@ -482,6 +495,7 @@ function calculateItemSpan(item: NormalizedItem, timeCells: TimeCell[]): ItemSpa
     startOffset,
     endOffset,
     stackRow: 0,
+    labelLeft: false, // Will be determined later based on position
   };
 }
 
@@ -519,6 +533,104 @@ function estimateTextPercent(content: string, timelineWidthPx: number, compact: 
 }
 
 /**
+ * Determine if a label should be positioned to the left of the bar/point.
+ * Only applies to items that END at the last column of the timeline (i.e., at the edge).
+ * This is a conservative check - we only move labels left for items truly at the end.
+ */
+function shouldLabelBeLeft(
+  span: ItemSpan,
+  numCells: number,
+  timelineWidthPx: number,
+  compactStacking: boolean,
+  labelPosition: LabelPosition
+): boolean {
+  // If labelPosition is 'right', always use right positioning (original behavior)
+  if (labelPosition === 'right') {
+    return false;
+  }
+
+  // Only consider items that end in the last column of the timeline
+  const isAtTimelineEnd = span.endCol === numCells - 1;
+  if (!isAtTimelineEnd) {
+    return false;
+  }
+
+  // For items at the end, check if the label would overflow
+  const toPercent = (col: number, offset: number) => ((col + offset / 100) / numCells) * 100;
+  const startPercent = toPercent(span.startCol, span.startOffset);
+  const endPercent = toPercent(span.endCol, span.endOffset);
+
+  // Calculate text extent
+  const textPercent = estimateTextPercent(span.item.content, timelineWidthPx, compactStacking);
+
+  // Determine where the label would start (for right-positioned labels)
+  let labelStartPercent: number;
+  if (span.item.isPoint) {
+    // Point: label starts just after the dot (roughly 1.5% for the dot width)
+    labelStartPercent = startPercent + 1.5;
+  } else {
+    // Box/range: label starts at the end of the bar (or outside if text doesn't fit)
+    const barWidthPercent = endPercent - startPercent;
+    const textFitsInBar = barWidthPercent >= textPercent;
+    labelStartPercent = textFitsInBar ? endPercent : startPercent;
+  }
+
+  // Check if label would extend past 100% (end of timeline)
+  const labelEndPercent = labelStartPercent + textPercent;
+  return labelEndPercent > 100;
+}
+
+/**
+ * Calculate the effective bounds of an item span including its label.
+ * Returns [effectiveStart, effectiveEnd] as percentages.
+ */
+function getEffectiveBounds(
+  span: ItemSpan,
+  numCells: number,
+  timelineWidthPx: number,
+  compactStacking: boolean
+): [number, number] {
+  const toPercent = (col: number, offset: number) => ((col + offset / 100) / numCells) * 100;
+  const startPercent = toPercent(span.startCol, span.startOffset);
+  const endPercent = toPercent(span.endCol, span.endOffset);
+  const textPercent = estimateTextPercent(span.item.content, timelineWidthPx, compactStacking);
+
+  if (span.labelLeft) {
+    // Label is on the left - extends leftward from the start
+    let effectiveStart: number;
+    if (span.item.isPoint) {
+      // Point: label extends left from the dot position
+      effectiveStart = startPercent - textPercent;
+    } else {
+      // Box/range: label extends left from the start of the bar
+      effectiveStart = startPercent - textPercent;
+    }
+    return [effectiveStart, endPercent];
+  } else {
+    // Label is on the right (default) - extends rightward
+    let effectiveEnd: number;
+    if (span.item.isPoint) {
+      // Point: dot position + text extends to the right
+      effectiveEnd = startPercent + textPercent;
+    } else {
+      // Box/range item: check if text fits inside the bar
+      const barWidthPercent = endPercent - startPercent;
+      const textFitsInBar = barWidthPercent >= textPercent;
+
+      if (compactStacking && textFitsInBar) {
+        // Compact mode with text inside bar: just use bar end
+        effectiveEnd = endPercent;
+      } else {
+        // Text flows outside the bar
+        const textStartPercent = textFitsInBar ? endPercent : startPercent;
+        effectiveEnd = textStartPercent + textPercent;
+      }
+    }
+    return [startPercent, effectiveEnd];
+  }
+}
+
+/**
  * Check if two item spans overlap, considering text that extends beyond bars.
  * Uses percentage-based positions for consistency across granularities.
  */
@@ -529,52 +641,15 @@ function spansOverlap(
   timelineWidthPx: number = DEFAULT_TIMELINE_WIDTH_PX,
   numCells: number = 10
 ): boolean {
-  // Convert cell positions to percentage of timeline (0-100)
-  const toPercent = (col: number, offset: number) => ((col + offset / 100) / numCells) * 100;
-
-  const aStart = toPercent(a.startCol, a.startOffset);
-  const bStart = toPercent(b.startCol, b.startOffset);
-
-  // Ensure a starts before or at the same position as b
-  if (aStart > bStart) {
-    [a, b] = [b, a];
-  }
-
-  // Recalculate after potential swap
-  const aStartPercent = toPercent(a.startCol, a.startOffset);
-  const aEndPercent = toPercent(a.endCol, a.endOffset);
-  const bStartPercent = toPercent(b.startCol, b.startOffset);
-
-  // Calculate text extent as percentage of timeline
-  const aTextPercent = estimateTextPercent(a.item.content, timelineWidthPx, compactStacking);
-
-  // For box/range items: text is inside the bar or flows outside to the right
-  // For point items: text flows to the right of the dot
-  let aEffectiveEnd: number;
-  if (a.item.isPoint) {
-    // Point: dot position + text extends to the right
-    aEffectiveEnd = aStartPercent + aTextPercent;
-  } else {
-    // Box/range item: check if text fits inside the bar
-    const barWidthPercent = aEndPercent - aStartPercent;
-    const textFitsInBar = barWidthPercent >= aTextPercent;
-
-    if (compactStacking && textFitsInBar) {
-      // Compact mode with text inside bar: just use bar end
-      aEffectiveEnd = aEndPercent;
-    } else {
-      // Text flows outside the bar (either narrow bar or normal mode)
-      // Account for text extending from the bar's end (or start if very narrow)
-      const textStartPercent = textFitsInBar ? aEndPercent : aStartPercent;
-      aEffectiveEnd = textStartPercent + aTextPercent;
-    }
-  }
+  const [aStart, aEnd] = getEffectiveBounds(a, numCells, timelineWidthPx, compactStacking);
+  const [bStart, bEnd] = getEffectiveBounds(b, numCells, timelineWidthPx, compactStacking);
 
   // Minimum gap between items for visual clarity
   const minGapPercent = (8 / timelineWidthPx) * 100; // 8px minimum gap
 
-  // Items overlap if a's effective end reaches b's start
-  return aEffectiveEnd + minGapPercent >= bStartPercent;
+  // Check for overlap: items overlap if their effective ranges intersect
+  // Add minimum gap to prevent items from being too close
+  return !(aEnd + minGapPercent <= bStart || bEnd + minGapPercent <= aStart);
 }
 
 function stackItems(
@@ -582,9 +657,15 @@ function stackItems(
   maxDepth: number,
   compactStacking: boolean = false,
   timelineWidthPx: number = DEFAULT_TIMELINE_WIDTH_PX,
-  numCells: number = 10
+  numCells: number = 10,
+  labelPosition: LabelPosition = 'auto'
 ): ItemSpan[][] {
   if (spans.length === 0) return [];
+
+  // First, determine labelLeft for each span based on position
+  for (const span of spans) {
+    span.labelLeft = shouldLabelBeLeft(span, numCells, timelineWidthPx, compactStacking, labelPosition);
+  }
 
   // Sort by order field first (lower order = earlier in stack), then by start position, then by duration
   const sorted = [...spans].sort((a, b) => {
@@ -691,6 +772,11 @@ function renderItemBar(
     classes.push(item.className);
   }
 
+  // Add label-left class if label should be positioned to the left
+  if (span.labelLeft) {
+    classes.push(cls(prefix, 'item--label-left'));
+  }
+
   // Calculate position and width
   const totalCols = span.endCol - span.startCol + 1;
   let left: number;
@@ -775,7 +861,7 @@ function renderGroupRow(
   rowIndex: number,
   timelineWidthPx: number
 ): string {
-  const { classPrefix: prefix, showGroupLabels, stackItems: doStack, maxStackDepth, compactStacking } = options;
+  const { classPrefix: prefix, showGroupLabels, stackItems: doStack, maxStackDepth, compactStacking, labelPosition } = options;
   const numCells = timeCells.length;
 
   const rowClass = `${cls(prefix, 'row')} ${cls(prefix, rowIndex % 2 === 0 ? 'row--even' : 'row--odd')}`;
@@ -783,7 +869,7 @@ function renderGroupRow(
 
   // Stack items for this group
   const groupSpans = spans.filter(s => s.item.group === group.id);
-  const stacks = doStack ? stackItems(groupSpans, maxStackDepth, compactStacking, timelineWidthPx, numCells) : [groupSpans];
+  const stacks = doStack ? stackItems(groupSpans, maxStackDepth, compactStacking, timelineWidthPx, numCells, labelPosition) : [groupSpans];
   const stackDepth = stacks.length || 1;
 
   // Flatten stacks back to array with updated stackRow
@@ -955,6 +1041,7 @@ function resolveOptions(
     groupOrder: userOptions?.groupOrder ?? 'value',
     compactStacking: userOptions?.compactStacking ?? false,
     containerWidth: userOptions?.containerWidth ?? null,
+    labelPosition: userOptions?.labelPosition ?? 'auto',
   };
 }
 
@@ -1020,6 +1107,7 @@ export function renderTimeline(
 /**
  * Fix overflowing text in box/range items (browser only)
  * Call this after rendering to move text outside boxes that are too small.
+ * For items with label-left class, text is already positioned outside to the left.
  * @param container - The container element holding the timeline, or document if not specified
  * @param prefix - CSS class prefix (default: 'tl')
  */
@@ -1028,6 +1116,11 @@ export function fixOverflowingText(container?: Element, prefix: string = 'tl'): 
   const boxItems = root.querySelectorAll(`.${prefix}-item--range, .${prefix}-item--box`);
 
   boxItems.forEach(item => {
+    // Skip items with label-left - their labels are already positioned outside
+    if (item.classList.contains(`${prefix}-item--label-left`)) {
+      return;
+    }
+
     const content = item.querySelector(`.${prefix}-item-content`) as HTMLElement;
     if (content) {
       // First, ensure text is positioned inside to measure correctly
@@ -1234,6 +1327,39 @@ export function getTimelineStyles(prefix: string = 'tl'): string {
   padding: 2px 6px;
   color: #24292f;
   overflow: visible;
+}
+
+/* Label positioned to the left (for items near end of timeline) */
+.${prefix}-item--label-left .${prefix}-item-content {
+  position: absolute;
+  right: 100%;
+  left: auto;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 2px 6px;
+  color: #24292f;
+  overflow: visible;
+  text-align: right;
+}
+
+/* Point items with label on left: reverse flex direction */
+.${prefix}-item--point.${prefix}-item--label-left {
+  flex-direction: row-reverse;
+}
+
+.${prefix}-item--point.${prefix}-item--label-left .${prefix}-item-content {
+  position: relative;
+  right: auto;
+  top: auto;
+  transform: none;
+  text-align: right;
+}
+
+/* Box/Range items with label-left that also has text-outside: prioritize label-left */
+.${prefix}-item--text-outside.${prefix}-item--label-left .${prefix}-item-content {
+  left: auto;
+  right: 100%;
+  text-align: right;
 }
 
 .${prefix}-item--point .${prefix}-item-content {
