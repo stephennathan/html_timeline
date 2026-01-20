@@ -569,10 +569,17 @@ function shouldLabelBeLeft(
     // Point: label starts just after the dot (roughly 1.5% for the dot width)
     labelStartPercent = startPercent + 1.5;
   } else {
-    // Box/range: label starts at the end of the bar (or outside if text doesn't fit)
+    // Box/range: check if text fits inside the bar
     const barWidthPercent = endPercent - startPercent;
     const textFitsInBar = barWidthPercent >= textPercent;
-    labelStartPercent = textFitsInBar ? endPercent : startPercent;
+
+    // If text fits inside the bar, it stays inside - no need for label-left
+    if (textFitsInBar) {
+      return false;
+    }
+
+    // Text doesn't fit inside, so it would be positioned outside starting at bar's start
+    labelStartPercent = startPercent;
   }
 
   // Check if label would extend past 100% (end of timeline)
