@@ -170,40 +170,46 @@ function normalizeDate(date: Date | string | number): Date {
 }
 
 function daysBetween(start: Date, end: Date): number {
-  const MS_PER_DAY = 86400000;
+  const MS_PER_DAY = 86_400_000;
   return (end.getTime() - start.getTime()) / MS_PER_DAY;
 }
 
-function alignToGranularity(date: Date, granularity: TimeGranularity, weekStartDay: number = 0): Date {
+function alignToGranularity(date: Date, granularity: TimeGranularity, weekStartDay = 0): Date {
   const aligned = new Date(date);
 
   switch (granularity) {
-    case 'hour':
+    case 'hour': {
       aligned.setMinutes(0, 0, 0);
       break;
-    case 'day':
+    }
+    case 'day': {
       aligned.setHours(0, 0, 0, 0);
       break;
-    case 'week':
+    }
+    case 'week': {
       aligned.setHours(0, 0, 0, 0);
       const day = aligned.getDay();
       // Calculate days to subtract to reach the week start day
       const daysToSubtract = (day - weekStartDay + 7) % 7;
       aligned.setDate(aligned.getDate() - daysToSubtract);
       break;
-    case 'month':
+    }
+    case 'month': {
       aligned.setHours(0, 0, 0, 0);
       aligned.setDate(1);
       break;
-    case 'quarter':
+    }
+    case 'quarter': {
       aligned.setHours(0, 0, 0, 0);
       aligned.setDate(1);
       aligned.setMonth(Math.floor(aligned.getMonth() / 3) * 3);
       break;
-    case 'year':
+    }
+    case 'year': {
       aligned.setHours(0, 0, 0, 0);
       aligned.setMonth(0, 1);
       break;
+    }
   }
 
   return aligned;
@@ -213,24 +219,30 @@ function advanceByGranularity(date: Date, granularity: TimeGranularity): Date {
   const next = new Date(date);
 
   switch (granularity) {
-    case 'hour':
+    case 'hour': {
       next.setHours(next.getHours() + 1);
       break;
-    case 'day':
+    }
+    case 'day': {
       next.setDate(next.getDate() + 1);
       break;
-    case 'week':
+    }
+    case 'week': {
       next.setDate(next.getDate() + 7);
       break;
-    case 'month':
+    }
+    case 'month': {
       next.setMonth(next.getMonth() + 1);
       break;
-    case 'quarter':
+    }
+    case 'quarter': {
       next.setMonth(next.getMonth() + 3);
       break;
-    case 'year':
+    }
+    case 'year': {
       next.setFullYear(next.getFullYear() + 1);
       break;
+    }
   }
 
   return next;
@@ -238,22 +250,28 @@ function advanceByGranularity(date: Date, granularity: TimeGranularity): Date {
 
 function formatDateLabel(date: Date, granularity: TimeGranularity, locale: string): string {
   switch (granularity) {
-    case 'hour':
+    case 'hour': {
       return date.toLocaleString(locale, { hour: 'numeric', hour12: true });
-    case 'day':
+    }
+    case 'day': {
       return date.toLocaleDateString(locale, { day: 'numeric', month: 'short' });
-    case 'week':
+    }
+    case 'week': {
       // Format as w/c d/mm (week commencing)
       const day = date.getDate();
       const month = date.getMonth() + 1;
       return `w/c ${day}/${month}`;
-    case 'month':
+    }
+    case 'month': {
       return date.toLocaleDateString(locale, { month: 'short' });
-    case 'quarter':
+    }
+    case 'quarter': {
       const q = Math.floor(date.getMonth() / 3) + 1;
       return `Q${q}`;
-    case 'year':
+    }
+    case 'year': {
       return date.getFullYear().toString();
+    }
   }
 }
 
@@ -265,8 +283,8 @@ function selectGranularity(start: Date, end: Date): TimeGranularity {
   const days = daysBetween(start, end);
 
   if (days <= 3) return 'hour';
-  if (days <= 14) return 'day';    // Up to 2 weeks: daily
-  if (days <= 90) return 'week';   // Up to 3 months: weekly
+  if (days <= 14) return 'day'; // Up to 2 weeks: daily
+  if (days <= 90) return 'week'; // Up to 3 months: weekly
   if (days <= 730) return 'month'; // Up to 2 years: monthly
   if (days <= 1825) return 'quarter';
   return 'year';
@@ -299,7 +317,7 @@ function normalizeItem(item: TimelineItem): NormalizedItem {
     start,
     end,
     type,
-    isPoint,
+    isPoint
   };
 }
 
@@ -321,7 +339,7 @@ function normalizeGroups(
   const normalized: NormalizedGroup[] = groups.map((group, index) => ({
     ...group,
     sortOrder: groupOrder === 'value' ? (group.value ?? index) : index,
-    items: itemsByGroup.get(group.id) || [],
+    items: itemsByGroup.get(group.id) || []
   }));
 
   // Sort groups
@@ -346,7 +364,7 @@ function generateTimeCells(
   end: Date,
   granularity: TimeGranularity,
   locale: string,
-  weekStartDay: number = 0
+  weekStartDay = 0
 ): TimeCell[] {
   const cells: TimeCell[] = [];
   let current = alignToGranularity(start, granularity, weekStartDay);
@@ -359,7 +377,7 @@ function generateTimeCells(
       start: new Date(current),
       end: new Date(Math.min(cellEnd.getTime(), end.getTime())),
       label: formatDateLabel(current, granularity, locale),
-      colIndex,
+      colIndex
     });
 
     current = cellEnd;
@@ -396,7 +414,7 @@ function generateHeaderGroups(
     let currentYear: number | null = null;
     let currentGroup: HeaderGroup | null = null;
 
-    timeCells.forEach((cell, index) => {
+    for (const [index, cell] of timeCells.entries()) {
       const year = cell.start.getFullYear();
       if (year !== currentYear) {
         if (currentGroup) groups.push(currentGroup);
@@ -405,14 +423,14 @@ function generateHeaderGroups(
       } else if (currentGroup) {
         currentGroup.span++;
       }
-    });
+    }
     if (currentGroup) groups.push(currentGroup);
   } else if (granularity === 'day') {
     // Group by week commencing
     let currentWeekStart: number | null = null;
     let currentGroup: HeaderGroup | null = null;
 
-    timeCells.forEach((cell, index) => {
+    for (const [index, cell] of timeCells.entries()) {
       const weekStart = alignToGranularity(cell.start, 'week', weekStartDay);
       const weekStartTime = weekStart.getTime();
 
@@ -426,7 +444,7 @@ function generateHeaderGroups(
       } else if (currentGroup) {
         currentGroup.span++;
       }
-    });
+    }
     if (currentGroup) groups.push(currentGroup);
   }
 
@@ -437,20 +455,19 @@ function generateHeaderGroups(
 // ITEM-TO-CELL MAPPING
 // ============================================================================
 
-function findCellIndex(date: Date, timeCells: TimeCell[], inclusive: boolean = false): number {
-  for (let i = 0; i < timeCells.length; i++) {
-    const cell = timeCells[i];
+function findCellIndex(date: Date, timeCells: TimeCell[], inclusive = false): number {
+  for (const [index, cell] of timeCells.entries()) {
     if (!cell) continue;
     if (inclusive) {
-      if (date >= cell.start && date <= cell.end) return i;
+      if (date >= cell.start && date <= cell.end) return index;
     } else {
-      if (date >= cell.start && date < cell.end) return i;
+      if (date >= cell.start && date < cell.end) return index;
     }
   }
 
   if (timeCells.length > 0) {
     const firstCell = timeCells[0];
-    const lastCell = timeCells[timeCells.length - 1];
+    const lastCell = timeCells.at(-1);
     if (firstCell && date < firstCell.start) return 0;
     if (lastCell && date >= lastCell.end) return timeCells.length - 1;
   }
@@ -495,7 +512,7 @@ function calculateItemSpan(item: NormalizedItem, timeCells: TimeCell[]): ItemSpa
     startOffset,
     endOffset,
     stackRow: 0,
-    labelLeft: false, // Will be determined later based on position
+    labelLeft: false // Will be determined later based on position
   };
 }
 
@@ -518,7 +535,7 @@ function estimateTextWidthPx(content: string): number {
  * Calculate text extent as percentage of total timeline width.
  * This makes stacking consistent across different granularities.
  */
-function estimateTextPercent(content: string, timelineWidthPx: number, compact: boolean = false): number {
+function estimateTextPercent(content: string, timelineWidthPx: number, compact = false): number {
   const textWidthPx = estimateTextWidthPx(content);
 
   if (compact) {
@@ -539,7 +556,7 @@ function estimateTextPercent(content: string, timelineWidthPx: number, compact: 
  */
 function shouldLabelBeLeft(
   span: ItemSpan,
-  numCells: number,
+  numberCells: number,
   timelineWidthPx: number,
   compactStacking: boolean,
   labelPosition: LabelPosition
@@ -550,13 +567,13 @@ function shouldLabelBeLeft(
   }
 
   // Only consider items that end in the last column of the timeline
-  const isAtTimelineEnd = span.endCol === numCells - 1;
+  const isAtTimelineEnd = span.endCol === numberCells - 1;
   if (!isAtTimelineEnd) {
     return false;
   }
 
   // For items at the end, check if the label would overflow
-  const toPercent = (col: number, offset: number) => ((col + offset / 100) / numCells) * 100;
+  const toPercent = (col: number, offset: number) => ((col + offset / 100) / numberCells) * 100;
   const startPercent = toPercent(span.startCol, span.startOffset);
   const endPercent = toPercent(span.endCol, span.endOffset);
 
@@ -593,11 +610,11 @@ function shouldLabelBeLeft(
  */
 function getEffectiveBounds(
   span: ItemSpan,
-  numCells: number,
+  numberCells: number,
   timelineWidthPx: number,
   compactStacking: boolean
 ): [number, number] {
-  const toPercent = (col: number, offset: number) => ((col + offset / 100) / numCells) * 100;
+  const toPercent = (col: number, offset: number) => ((col + offset / 100) / numberCells) * 100;
   const startPercent = toPercent(span.startCol, span.startOffset);
   const endPercent = toPercent(span.endCol, span.endOffset);
   const textPercent = estimateTextPercent(span.item.content, timelineWidthPx, compactStacking);
@@ -644,12 +661,12 @@ function getEffectiveBounds(
 function spansOverlap(
   a: ItemSpan,
   b: ItemSpan,
-  compactStacking: boolean = false,
+  compactStacking = false,
   timelineWidthPx: number = DEFAULT_TIMELINE_WIDTH_PX,
-  numCells: number = 10
+  numberCells = 10
 ): boolean {
-  const [aStart, aEnd] = getEffectiveBounds(a, numCells, timelineWidthPx, compactStacking);
-  const [bStart, bEnd] = getEffectiveBounds(b, numCells, timelineWidthPx, compactStacking);
+  const [aStart, aEnd] = getEffectiveBounds(a, numberCells, timelineWidthPx, compactStacking);
+  const [bStart, bEnd] = getEffectiveBounds(b, numberCells, timelineWidthPx, compactStacking);
 
   // Minimum gap between items for visual clarity
   const minGapPercent = (8 / timelineWidthPx) * 100; // 8px minimum gap
@@ -662,16 +679,22 @@ function spansOverlap(
 function stackItems(
   spans: ItemSpan[],
   maxDepth: number,
-  compactStacking: boolean = false,
+  compactStacking = false,
   timelineWidthPx: number = DEFAULT_TIMELINE_WIDTH_PX,
-  numCells: number = 10,
+  numberCells = 10,
   labelPosition: LabelPosition = 'auto'
 ): ItemSpan[][] {
   if (spans.length === 0) return [];
 
   // First, determine labelLeft for each span based on position
   for (const span of spans) {
-    span.labelLeft = shouldLabelBeLeft(span, numCells, timelineWidthPx, compactStacking, labelPosition);
+    span.labelLeft = shouldLabelBeLeft(
+      span,
+      numberCells,
+      timelineWidthPx,
+      compactStacking,
+      labelPosition
+    );
   }
 
   // Sort by order field first (lower order = earlier in stack), then by start position, then by duration
@@ -712,7 +735,9 @@ function stackItems(
     for (let row = 0; row < Math.min(stacks.length, maxDepth); row++) {
       const stackRow = stacks[row];
       if (!stackRow) continue;
-      const canPlace = stackRow.every(existing => !spansOverlap(span, existing, compactStacking, timelineWidthPx, numCells));
+      const canPlace = stackRow.every(
+        (existing) => !spansOverlap(span, existing, compactStacking, timelineWidthPx, numberCells)
+      );
 
       if (canPlace) {
         span.stackRow = row;
@@ -736,34 +761,32 @@ function stackItems(
 // ============================================================================
 
 function cls(prefix: string, ...parts: string[]): string {
-  return parts.map(p => `${prefix}-${p}`).join(' ');
+  return parts.map((p) => `${prefix}-${p}`).join(' ');
 }
 
 function escapeHtml(text: string): string {
-  const div = typeof document !== 'undefined'
-    ? document.createElement('div')
-    : null;
+  const div = typeof document === 'undefined' ? null : document.createElement('div');
   if (div) {
     div.textContent = text;
     return div.innerHTML;
   }
   // Fallback for Node.js
   return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
 }
 
-function escapeAttr(value: string | number): string {
+function escapeAttribute(value: string | number): string {
   // Escape for use in HTML attributes (handles quotes and special chars)
   return String(value)
-    .replace(/&/g, '&amp;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
+    .replaceAll('&', '&amp;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;');
 }
 
 function renderItemBar(
@@ -802,7 +825,7 @@ function renderItemBar(
       // Multi-cell span: start offset in first cell
       left = span.startOffset;
       // Width extends across cells
-      width = (100 - span.startOffset) + ((totalCols - 2) * 100) + span.endOffset;
+      width = 100 - span.startOffset + (totalCols - 2) * 100 + span.endOffset;
     }
   }
 
@@ -814,7 +837,7 @@ function renderItemBar(
   const styles: string[] = [
     `left: ${left.toFixed(1)}%`,
     `width: ${width.toFixed(1)}%`,
-    `top: ${top}px`,
+    `top: ${top}px`
   ];
 
   // Point items use fixed size, range items use calculated height
@@ -824,18 +847,18 @@ function renderItemBar(
 
   if (item.style) {
     // Escape quotes to prevent attribute breakout
-    styles.push(escapeAttr(item.style));
+    styles.push(escapeAttribute(item.style));
   }
 
   // Add title attribute - for point items, always show title since content is hidden
   const titleText = item.title || (item.isPoint ? item.content : '');
-  const titleAttr = titleText ? ` title="${escapeAttr(titleText)}"` : '';
+  const titleAttribute = titleText ? ` title="${escapeAttribute(titleText)}"` : '';
 
   // Escape class names and item ID to prevent XSS
-  const safeClasses = classes.map(c => escapeAttr(c)).join(' ');
-  const safeId = escapeAttr(item.id);
+  const safeClasses = classes.map((c) => escapeAttribute(c)).join(' ');
+  const safeId = escapeAttribute(item.id);
 
-  return `<div class="${safeClasses}" style="${styles.join('; ')}" data-item-id="${safeId}"${titleAttr}>
+  return `<div class="${safeClasses}" style="${styles.join('; ')}" data-item-id="${safeId}"${titleAttribute}>
     <span class="${cls(prefix, 'item-content')}">${escapeHtml(item.content)}</span>
   </div>`;
 }
@@ -848,7 +871,7 @@ function renderCell(
   prefix: string
 ): string {
   // Filter spans that start in this column
-  const cellSpans = spans.filter(s => s.startCol === colIndex);
+  const cellSpans = spans.filter((s) => s.startCol === colIndex);
 
   let content = '';
   for (const span of cellSpans) {
@@ -868,15 +891,31 @@ function renderGroupRow(
   rowIndex: number,
   timelineWidthPx: number
 ): string {
-  const { classPrefix: prefix, showGroupLabels, stackItems: doStack, maxStackDepth, compactStacking, labelPosition } = options;
-  const numCells = timeCells.length;
+  const {
+    classPrefix: prefix,
+    showGroupLabels,
+    stackItems: doStack,
+    maxStackDepth,
+    compactStacking,
+    labelPosition
+  } = options;
+  const numberCells = timeCells.length;
 
   const rowClass = `${cls(prefix, 'row')} ${cls(prefix, rowIndex % 2 === 0 ? 'row--even' : 'row--odd')}`;
-  const groupClass = group.className ? ` ${escapeAttr(group.className)}` : '';
+  const groupClass = group.className ? ` ${escapeAttribute(group.className)}` : '';
 
   // Stack items for this group
-  const groupSpans = spans.filter(s => s.item.group === group.id);
-  const stacks = doStack ? stackItems(groupSpans, maxStackDepth, compactStacking, timelineWidthPx, numCells, labelPosition) : [groupSpans];
+  const groupSpans = spans.filter((s) => s.item.group === group.id);
+  const stacks = doStack
+    ? stackItems(
+        groupSpans,
+        maxStackDepth,
+        compactStacking,
+        timelineWidthPx,
+        numberCells,
+        labelPosition
+      )
+    : [groupSpans];
   const stackDepth = stacks.length || 1;
 
   // Flatten stacks back to array with updated stackRow
@@ -886,30 +925,34 @@ function renderGroupRow(
 
   // Group label cell
   if (showGroupLabels) {
-    const labelStyle = group.style ? ` style="${escapeAttr(group.style)}"` : '';
+    const labelStyle = group.style ? ` style="${escapeAttribute(group.style)}"` : '';
     cells += `<td class="${cls(prefix, 'group-label')}${groupClass}"${labelStyle}>${escapeHtml(group.content)}</td>`;
   }
 
   // Data cells
-  for (let i = 0; i < timeCells.length; i++) {
-    cells += renderCell(allSpans, i, timeCells, stackDepth, prefix);
+  for (let index = 0; index < timeCells.length; index++) {
+    cells += renderCell(allSpans, index, timeCells, stackDepth, prefix);
   }
 
   // Calculate row height: 28px per stack row (24px item + 4px gap) + 8px padding
   const rowHeight = stackDepth * 28 + 8;
   const rowStyle = ` style="height: ${rowHeight}px"`;
 
-  return `<tr class="${rowClass}" data-group-id="${escapeAttr(group.id)}"${rowStyle}>${cells}</tr>`;
+  return `<tr class="${rowClass}" data-group-id="${escapeAttribute(group.id)}"${rowStyle}>${cells}</tr>`;
 }
 
-function renderHeader(
-  timeCells: TimeCell[],
-  options: ResolvedOptions
-): string {
-  const { classPrefix: prefix, showGroupLabels, groupLabelWidth, granularity, weekStartDay } = options;
+function renderHeader(timeCells: TimeCell[], options: ResolvedOptions): string {
+  const {
+    classPrefix: prefix,
+    showGroupLabels,
+    groupLabelWidth,
+    granularity,
+    weekStartDay
+  } = options;
 
   // Check if we need a grouped header row (year for month/quarter, w/c for day)
-  const needsGroupRow = granularity === 'month' || granularity === 'quarter' || granularity === 'day';
+  const needsGroupRow =
+    granularity === 'month' || granularity === 'quarter' || granularity === 'day';
   const groups = needsGroupRow ? generateHeaderGroups(timeCells, granularity, weekStartDay) : [];
 
   let headerHtml = '';
@@ -967,11 +1010,10 @@ function renderTable(
   const header = renderHeader(timeCells, options);
 
   let rows = '';
-  for (let i = 0; i < groups.length; i++) {
-    const group = groups[i];
+  for (const [index, group] of groups.entries()) {
     if (!group) continue;
-    const groupSpans = allSpans.filter(s => s.item.group === group.id);
-    rows += renderGroupRow(group, groupSpans, timeCells, options, i, timelineWidthPx);
+    const groupSpans = allSpans.filter((s) => s.item.group === group.id);
+    rows += renderGroupRow(group, groupSpans, timeCells, options, index, timelineWidthPx);
   }
 
   return `<table class="${cls(prefix, 'table')}">
@@ -984,35 +1026,25 @@ function renderTable(
 // MAIN RENDERING FUNCTIONS
 // ============================================================================
 
-function resolveOptions(
-  items: NormalizedItem[],
-  userOptions?: TimelineOptions
-): ResolvedOptions {
+function resolveOptions(items: NormalizedItem[], userOptions?: TimelineOptions): ResolvedOptions {
   // Auto-detect date range from items
   let start: Date;
   let end: Date;
 
-  if (userOptions?.start) {
-    start = normalizeDate(userOptions.start);
-  } else {
-    start = items.reduce((min, item) =>
-      item.start < min ? item.start : min, items[0]?.start || new Date());
-  }
+  start = userOptions?.start
+    ? normalizeDate(userOptions.start)
+    : new Date(items.reduce((min, item) => Math.min(item.start.getTime(), min), items[0]?.start.getTime() ?? Date.now()));
 
-  if (userOptions?.end) {
-    end = normalizeDate(userOptions.end);
-  } else {
-    end = items.reduce((max, item) =>
-      item.end > max ? item.end : max, items[0]?.end || new Date());
-  }
+  end = userOptions?.end
+    ? normalizeDate(userOptions.end)
+    : new Date(items.reduce((max, item) => Math.max(item.end.getTime(), max), items[0]?.end.getTime() ?? Date.now()));
 
   // Select granularity first (needed for proper alignment)
   let granularity: TimeGranularity;
-  if (!userOptions?.granularity || userOptions.granularity === 'auto') {
-    granularity = selectGranularity(start, end);
-  } else {
-    granularity = userOptions.granularity;
-  }
+  granularity =
+    !userOptions?.granularity || userOptions.granularity === 'auto'
+      ? selectGranularity(start, end)
+      : userOptions.granularity;
 
   // Align dates to granularity boundaries, then add padding only at the end
   // This prevents empty leading columns
@@ -1027,9 +1059,9 @@ function resolveOptions(
   const groupLabelWidth = userOptions?.groupLabelWidth ?? '180px';
   let groupLabelWidthPx = 180;
   if (typeof groupLabelWidth === 'string') {
-    const match = groupLabelWidth.match(/^(\d+)/);
-    if (match && match[1]) {
-      groupLabelWidthPx = parseInt(match[1], 10);
+    const match = /^(\d+)/.exec(groupLabelWidth);
+    if (match?.[1]) {
+      groupLabelWidthPx = Number.parseInt(match[1], 10);
     }
   }
 
@@ -1048,7 +1080,7 @@ function resolveOptions(
     groupOrder: userOptions?.groupOrder ?? 'value',
     compactStacking: userOptions?.compactStacking ?? false,
     containerWidth: userOptions?.containerWidth ?? null,
-    labelPosition: userOptions?.labelPosition ?? 'auto',
+    labelPosition: userOptions?.labelPosition ?? 'auto'
   };
 }
 
@@ -1118,14 +1150,14 @@ export function renderTimeline(
  * @param container - The container element holding the timeline, or document if not specified
  * @param prefix - CSS class prefix (default: 'tl')
  */
-export function fixOverflowingText(container?: Element, prefix: string = 'tl'): void {
+export function fixOverflowingText(container?: Element, prefix = 'tl'): void {
   const root = container || document;
   const boxItems = root.querySelectorAll(`.${prefix}-item--range, .${prefix}-item--box`);
 
-  boxItems.forEach(item => {
+  for (const item of boxItems) {
     // Skip items with label-left - their labels are already positioned outside
     if (item.classList.contains(`${prefix}-item--label-left`)) {
-      return;
+      continue;
     }
 
     const content = item.querySelector(`.${prefix}-item-content`) as HTMLElement;
@@ -1145,13 +1177,13 @@ export function fixOverflowingText(container?: Element, prefix: string = 'tl'): 
         item.classList.add(`${prefix}-item--text-outside`);
       }
     }
-  });
+  }
 }
 
 /**
  * Get default CSS styles for the timeline
  */
-export function getTimelineStyles(prefix: string = 'tl'): string {
+export function getTimelineStyles(prefix = 'tl'): string {
   return `
 /* HTML Timeline Generator - Default Styles */
 
@@ -1487,17 +1519,17 @@ export interface MountedTimeline {
  * @param styleId - ID for the style element (default: 'timeline-styles')
  * @returns The style element
  */
-export function injectStyles(prefix: string = 'tl', styleId: string = 'timeline-styles'): HTMLStyleElement {
-  let styleEl = document.getElementById(styleId) as HTMLStyleElement;
+export function injectStyles(prefix = 'tl', styleId = 'timeline-styles'): HTMLStyleElement {
+  let styleElement = document.getElementById(styleId) as HTMLStyleElement;
 
-  if (!styleEl) {
-    styleEl = document.createElement('style');
-    styleEl.id = styleId;
-    document.head.appendChild(styleEl);
+  if (!styleElement) {
+    styleElement = document.createElement('style');
+    styleElement.id = styleId;
+    document.head.append(styleElement);
   }
 
-  styleEl.textContent = getTimelineStyles(prefix);
-  return styleEl;
+  styleElement.textContent = getTimelineStyles(prefix);
+  return styleElement;
 }
 
 /**
@@ -1508,7 +1540,7 @@ export function injectStyles(prefix: string = 'tl', styleId: string = 'timeline-
  */
 export function createResizeHandler(
   callback: () => void,
-  delay: number = 150
+  delay = 150
 ): { attach: () => void; detach: () => void } {
   let timeout: ReturnType<typeof setTimeout> | null = null;
 
@@ -1518,11 +1550,13 @@ export function createResizeHandler(
   };
 
   return {
-    attach: () => window.addEventListener('resize', handler),
+    attach: () => {
+      window.addEventListener('resize', handler);
+    },
     detach: () => {
       if (timeout) clearTimeout(timeout);
       window.removeEventListener('resize', handler);
-    },
+    }
   };
 }
 
@@ -1557,11 +1591,10 @@ export function mountTimeline(
   options: MountOptions = {}
 ): MountedTimeline {
   // Resolve container
-  const containerEl = typeof container === 'string'
-    ? document.querySelector<HTMLElement>(container)
-    : container;
+  const containerElement =
+    typeof container === 'string' ? document.querySelector<HTMLElement>(container) : container;
 
-  if (!containerEl) {
+  if (!containerElement) {
     throw new Error(`Timeline container not found: ${container}`);
   }
 
@@ -1575,15 +1608,15 @@ export function mountTimeline(
   // Render function
   const render = () => {
     // Auto-detect container width if not specified
-    const containerWidth = currentOptions.containerWidth ?? containerEl.clientWidth;
+    const containerWidth = currentOptions.containerWidth ?? containerElement.clientWidth;
 
     const html = renderTimelineToString(items, groups, {
       ...currentOptions,
-      containerWidth,
+      containerWidth
     });
 
-    containerEl.innerHTML = html;
-    fixOverflowingText(containerEl, prefix);
+    containerElement.innerHTML = html;
+    fixOverflowingText(containerElement, prefix);
 
     if (currentOptions.onRender) {
       currentOptions.onRender();
@@ -1608,9 +1641,9 @@ export function mountTimeline(
     },
     destroy: () => {
       resizeHandler.detach();
-      containerEl.innerHTML = '';
+      containerElement.innerHTML = '';
     },
-    getOptions: () => ({ ...currentOptions }),
+    getOptions: () => ({ ...currentOptions })
   };
 }
 
@@ -1627,7 +1660,7 @@ const pptxColorMap: Record<string, { fill: string; border: string }> = {
   info: { fill: '0550ae', border: '033d8b' },
   purple: { fill: '8250df', border: '6639ba' },
   pink: { fill: 'bf3989', border: '99286e' },
-  orange: { fill: 'ea580c', border: 'c2410c' },
+  orange: { fill: 'ea580c', border: 'c2410c' }
 };
 
 const DEFAULT_ITEM_COLOR = { fill: '0969da', border: '0550ae' };
@@ -1665,15 +1698,14 @@ export function exportTimelineToPptx(
   pptx: any, // PptxGenJS instance
   options: PptxExportOptions = {}
 ): any {
-  const containerEl = typeof container === 'string'
-    ? document.querySelector<HTMLElement>(container)
-    : container;
+  const containerElement =
+    typeof container === 'string' ? document.querySelector<HTMLElement>(container) : container;
 
-  if (!containerEl) {
+  if (!containerElement) {
     throw new Error(`Timeline container not found: ${container}`);
   }
 
-  const table = containerEl.querySelector('table');
+  const table = containerElement.querySelector('table');
   if (!table) {
     throw new Error('No timeline table found in container');
   }
@@ -1684,7 +1716,7 @@ export function exportTimelineToPptx(
     slideHeight = 7.5,
     margin = 0.3,
     titleHeight = 0.6,
-    prefix = 'tl',
+    prefix = 'tl'
   } = options;
 
   const slide = pptx.addSlide();
@@ -1697,7 +1729,7 @@ export function exportTimelineToPptx(
     h: titleHeight,
     fontSize: 16,
     bold: true,
-    color: '24292f',
+    color: '24292f'
   });
 
   // Get table dimensions from DOM
@@ -1724,7 +1756,7 @@ export function exportTimelineToPptx(
 
   // Process header rows (may have 1 or 2 rows for grouped headers)
   const headerRows = table.querySelectorAll('thead tr');
-  headerRows.forEach((headerRow) => {
+  for (const headerRow of headerRows) {
     const headerRect = headerRow.getBoundingClientRect();
     const headerY = headerRect.top - tableRect.top;
     const headerH = headerRect.height;
@@ -1739,11 +1771,11 @@ export function exportTimelineToPptx(
       w: pptxTableW,
       h: toInchH(headerH),
       fill: { color: bgColor },
-      line: { color: 'd0d7de', pt: 0.5 },
+      line: { color: 'd0d7de', pt: 0.5 }
     });
 
     // Header cells text
-    headerRow.querySelectorAll('th').forEach((th) => {
+    for (const th of headerRow.querySelectorAll('th')) {
       const thRect = th.getBoundingClientRect();
       const cellX = thRect.left - tableRect.left;
       const cellW = thRect.width;
@@ -1759,27 +1791,27 @@ export function exportTimelineToPptx(
         bold: true,
         color: '24292f',
         align: 'center',
-        valign: 'middle',
+        valign: 'middle'
       });
-    });
-  });
+    }
+  }
 
   // Process body rows
   const bodyRows = table.querySelectorAll('tbody tr');
-  bodyRows.forEach((row, rowIdx) => {
+  for (const [rowIndex, row] of bodyRows.entries()) {
     const rowRect = row.getBoundingClientRect();
     const rowY = rowRect.top - tableRect.top;
     const rowH = rowRect.height;
 
     // Row background
-    const bgColor = rowIdx % 2 === 0 ? 'FFFFFF' : 'f6f8fa';
+    const bgColor = rowIndex % 2 === 0 ? 'FFFFFF' : 'f6f8fa';
     slide.addShape(pptx.ShapeType.rect, {
       x: tableX,
       y: toInchY(rowY),
       w: pptxTableW,
       h: toInchH(rowH),
       fill: { color: bgColor },
-      line: { color: 'eaeef2', pt: 0.25 },
+      line: { color: 'eaeef2', pt: 0.25 }
     });
 
     // Group label
@@ -1795,7 +1827,7 @@ export function exportTimelineToPptx(
         w: toInchW(labelW),
         h: toInchH(rowH),
         fill: { color: 'f6f8fa' },
-        line: { color: 'd0d7de', pt: 0.5 },
+        line: { color: 'd0d7de', pt: 0.5 }
       });
 
       slide.addText(groupLabel.textContent || '', {
@@ -1806,10 +1838,10 @@ export function exportTimelineToPptx(
         fontSize: 8,
         bold: true,
         color: '24292f',
-        valign: 'middle',
+        valign: 'middle'
       });
     }
-  });
+  }
 
   // Draw vertical date dividers
   const firstBodyRow = bodyRows[0];
@@ -1822,8 +1854,8 @@ export function exportTimelineToPptx(
     const gridStartY = firstRowRect.top - tableRect.top;
     const gridEndY = lastRowRect.bottom - tableRect.top;
 
-    mainHeaderRow.querySelectorAll('th').forEach((th: Element, idx: number) => {
-      if (idx === 0) return; // Skip group label column
+    mainHeaderRow.querySelectorAll('th').forEach((th: Element, index: number) => {
+      if (index === 0) return; // Skip group label column
 
       const thRect = th.getBoundingClientRect();
       const cellX = thRect.left - tableRect.left;
@@ -1833,7 +1865,7 @@ export function exportTimelineToPptx(
         y: toInchY(gridStartY),
         w: 0,
         h: toInchH(gridEndY - gridStartY),
-        line: { color: 'eaeef2', pt: 0.5 },
+        line: { color: 'eaeef2', pt: 0.5 }
       });
     });
 
@@ -1847,14 +1879,14 @@ export function exportTimelineToPptx(
         y: toInchY(gridStartY),
         w: 0,
         h: toInchH(gridEndY - gridStartY),
-        line: { color: 'eaeef2', pt: 0.5 },
+        line: { color: 'eaeef2', pt: 0.5 }
       });
     }
   }
 
   // Draw timeline items
-  bodyRows.forEach((row) => {
-    row.querySelectorAll(`.${prefix}-item`).forEach((item) => {
+  for (const row of bodyRows) {
+    for (const item of row.querySelectorAll(`.${prefix}-item`)) {
       const itemRect = item.getBoundingClientRect();
       const itemX = itemRect.left - tableRect.left;
       const itemY = itemRect.top - tableRect.top;
@@ -1864,8 +1896,8 @@ export function exportTimelineToPptx(
       const isPoint = item.classList.contains(`${prefix}-item--point`);
       const isLabelLeft = item.classList.contains(`${prefix}-item--label-left`);
       const colors = getItemColor(item.classList);
-      const contentEl = item.querySelector(`.${prefix}-item-content`);
-      const content = contentEl?.textContent || '';
+      const contentElement = item.querySelector(`.${prefix}-item-content`);
+      const content = contentElement?.textContent || '';
 
       if (isPoint) {
         // Point item: draw circle
@@ -1879,7 +1911,7 @@ export function exportTimelineToPptx(
           w: dotSize,
           h: dotSize,
           fill: { color: colors.fill },
-          line: { color: colors.border, pt: 1.5 },
+          line: { color: colors.border, pt: 1.5 }
         });
 
         // Text next to dot - position based on label-left
@@ -1894,7 +1926,7 @@ export function exportTimelineToPptx(
             fontSize: 8,
             color: '24292f',
             valign: 'middle',
-            align: 'right',
+            align: 'right'
           });
         } else {
           // Text to the right of the dot (default)
@@ -1906,7 +1938,7 @@ export function exportTimelineToPptx(
             h: 0.2,
             fontSize: 8,
             color: '24292f',
-            valign: 'middle',
+            valign: 'middle'
           });
         }
       } else {
@@ -1918,7 +1950,7 @@ export function exportTimelineToPptx(
           h: toInchH(itemH),
           fill: { color: colors.fill },
           line: { color: colors.border, pt: 0.75 },
-          rectRadius: 0.03,
+          rectRadius: 0.03
         });
 
         const textOutside = item.classList.contains(`${prefix}-item--text-outside`);
@@ -1936,7 +1968,7 @@ export function exportTimelineToPptx(
               fontSize: 8,
               color: '24292f',
               valign: 'middle',
-              align: 'right',
+              align: 'right'
             });
           } else {
             // Text to the right of the bar (default text-outside behavior)
@@ -1947,7 +1979,7 @@ export function exportTimelineToPptx(
               h: toInchH(itemH),
               fontSize: 8,
               color: '24292f',
-              valign: 'middle',
+              valign: 'middle'
             });
           }
         } else {
@@ -1959,12 +1991,12 @@ export function exportTimelineToPptx(
             h: toInchH(itemH),
             fontSize: 8,
             color: 'FFFFFF',
-            valign: 'middle',
+            valign: 'middle'
           });
         }
       }
-    });
-  });
+    }
+  }
 
   return slide;
 }
@@ -1981,5 +2013,5 @@ export default {
   injectStyles,
   createResizeHandler,
   mountTimeline,
-  exportTimelineToPptx,
+  exportTimelineToPptx
 };
