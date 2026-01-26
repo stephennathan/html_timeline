@@ -1033,11 +1033,21 @@ function resolveOptions(items: NormalizedItem[], userOptions?: TimelineOptions):
 
   start = userOptions?.start
     ? normalizeDate(userOptions.start)
-    : new Date(items.reduce((min, item) => Math.min(item.start.getTime(), min), items[0]?.start.getTime() ?? Date.now()));
+    : new Date(
+        items.reduce(
+          (min, item) => Math.min(item.start.getTime(), min),
+          items[0]?.start.getTime() ?? Date.now()
+        )
+      );
 
   end = userOptions?.end
     ? normalizeDate(userOptions.end)
-    : new Date(items.reduce((max, item) => Math.max(item.end.getTime(), max), items[0]?.end.getTime() ?? Date.now()));
+    : new Date(
+        items.reduce(
+          (max, item) => Math.max(item.end.getTime(), max),
+          items[0]?.end.getTime() ?? Date.now()
+        )
+      );
 
   // Select granularity first (needed for proper alignment)
   let granularity: TimeGranularity;
@@ -1845,9 +1855,9 @@ export function exportTimelineToPptx(
 
   // Draw vertical date dividers
   const firstBodyRow = bodyRows[0];
-  const lastBodyRow = bodyRows[bodyRows.length - 1];
+  const lastBodyRow = bodyRows.at(-1);
   // Use the last header row (main date labels, not group row) for column positions
-  const mainHeaderRow = headerRows[headerRows.length - 1];
+  const mainHeaderRow = headerRows.at(-1);
   if (firstBodyRow && lastBodyRow && mainHeaderRow) {
     const firstRowRect = firstBodyRow.getBoundingClientRect();
     const lastRowRect = lastBodyRow.getBoundingClientRect();
