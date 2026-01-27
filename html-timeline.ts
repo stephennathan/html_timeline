@@ -1855,9 +1855,9 @@ export function exportTimelineToPptx(
 
   // Draw vertical date dividers
   const firstBodyRow = bodyRows[0];
-  const lastBodyRow = bodyRows[bodyRows.length - 1];
+  const lastBodyRow = bodyRows.at(-1);
   // Use the last header row (main date labels, not group row) for column positions
-  const mainHeaderRow = headerRows[headerRows.length - 1];
+  const mainHeaderRow = headerRows.at(-1);
   if (firstBodyRow && lastBodyRow && mainHeaderRow) {
     const firstRowRect = firstBodyRow.getBoundingClientRect();
     const lastRowRect = lastBodyRow.getBoundingClientRect();
