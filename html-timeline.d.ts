@@ -49,6 +49,8 @@ export interface TimelineGroup {
   /** Custom inline styles */
   style?: string;
 }
+/** Label position behavior for items extending past timeline end */
+export type LabelPosition = 'auto' | 'right';
 /**
  * Timeline configuration options
  */
@@ -89,6 +91,33 @@ export interface TimelineOptions {
    * to different screen sizes.
    */
   containerWidth?: number;
+  /**
+   * Label position behavior for items near the end of the timeline.
+   * - 'auto' (default): Labels that would extend past the timeline end are
+   *   positioned to the left of the bar/point, right-aligned with the same gap spacing.
+   * - 'right': Labels always positioned to the right (original behavior).
+   */
+  labelPosition?: LabelPosition;
+}
+/**
+ * Minimal interface for PptxGenJS slide object.
+ * Only includes methods used by exportTimelineToPptx.
+ */
+interface PptxSlide {
+  addText(text: string, options?: Record<string, unknown>): void;
+  addShape(shape: string, options?: Record<string, unknown>): void;
+}
+/**
+ * Minimal interface for PptxGenJS instance.
+ * Only includes methods used by exportTimelineToPptx.
+ */
+interface PptxGenJS {
+  addSlide(): PptxSlide;
+  ShapeType: {
+    rect: string;
+    line: string;
+    ellipse: string;
+  };
 }
 /**
  * Render timeline to HTML string
@@ -109,6 +138,7 @@ export declare function renderTimeline(
 /**
  * Fix overflowing text in box/range items (browser only)
  * Call this after rendering to move text outside boxes that are too small.
+ * For items with label-left class, text is already positioned outside to the left.
  * @param container - The container element holding the timeline, or document if not specified
  * @param prefix - CSS class prefix (default: 'tl')
  */
@@ -210,9 +240,9 @@ export interface PptxExportOptions {
  */
 export declare function exportTimelineToPptx(
   container: HTMLElement | string,
-  pptx: any, // PptxGenJS instance
+  pptx: PptxGenJS,
   options?: PptxExportOptions
-): any;
+): PptxSlide;
 declare const _default: {
   renderTimeline: typeof renderTimeline;
   renderTimelineToString: typeof renderTimelineToString;
