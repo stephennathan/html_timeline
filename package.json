@@ -7,6 +7,11 @@
     "test": "test"
   },
   "scripts": {
+    "prepare": "husky",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write \"**/*.{ts,js,json,md}\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -14,7 +19,7 @@
     "url": "git+https://github.com/stephennathan/html_timeline.git"
   },
   "keywords": [],
-  "author": "",
+  "author": "Steve Nathan",
   "license": "ISC",
   "type": "commonjs",
   "bugs": {
@@ -22,6 +27,15 @@
   },
   "homepage": "https://github.com/stephennathan/html_timeline#readme",
   "devDependencies": {
-    "typescript": "^5.9.3"
+    "@commitlint/cli": "^20.3.1",
+    "@commitlint/config-conventional": "^20.3.1",
+    "@eslint/js": "^9.39.1",
+    "eslint": "^9.39.1",
+    "eslint-config-prettier": "^10.1.8",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
+    "prettier": "^3.8.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.53.1"
   }
 }
