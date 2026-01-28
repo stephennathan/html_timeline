@@ -20,7 +20,7 @@ export const items = [
     end: '2024-02-28',
     type: 'box',
     className: 'danger',
-    order: 1
+    order: 1,
   },
   {
     id: 2,
@@ -30,7 +30,7 @@ export const items = [
     end: '2024-01-31',
     type: 'box',
     className: 'info',
-    order: 3
+    order: 3,
   },
   {
     id: 4,
@@ -40,7 +40,7 @@ export const items = [
     end: '2024-02-08',
     type: 'box',
     className: 'purple',
-    order: 4
+    order: 4,
   },
   {
     id: 3,
@@ -50,7 +50,7 @@ export const items = [
     end: '2024-02-15',
     type: 'box',
     className: 'warning',
-    order: 2
+    order: 2,
   },
 
   // Group 2: Mixed ordered and unordered items
@@ -63,7 +63,7 @@ export const items = [
     end: '2024-03-01',
     type: 'box',
     className: 'danger',
-    order: 1
+    order: 1,
   },
   {
     id: 6,
@@ -73,7 +73,7 @@ export const items = [
     end: '2024-02-20',
     type: 'box',
     className: 'warning',
-    order: 2
+    order: 2,
   },
   {
     id: 7,
@@ -82,7 +82,7 @@ export const items = [
     start: '2024-01-01',
     end: '2024-01-20',
     type: 'box',
-    className: 'info'
+    className: 'info',
   },
   {
     id: 8,
@@ -91,7 +91,7 @@ export const items = [
     start: '2024-01-10',
     end: '2024-01-30',
     type: 'box',
-    className: 'purple'
+    className: 'purple',
   },
   {
     id: 9,
@@ -100,7 +100,7 @@ export const items = [
     start: '2024-02-01',
     end: '2024-02-15',
     type: 'box',
-    className: 'pink'
+    className: 'pink',
   },
 
   // Group 3: Same order values - should fall back to date sorting
@@ -112,7 +112,7 @@ export const items = [
     end: '2024-02-15',
     type: 'box',
     className: 'danger',
-    order: 1
+    order: 1,
   },
   {
     id: 11,
@@ -122,7 +122,7 @@ export const items = [
     end: '2024-01-31',
     type: 'box',
     className: 'warning',
-    order: 1
+    order: 1,
   },
   {
     id: 12,
@@ -132,7 +132,7 @@ export const items = [
     end: '2024-02-28',
     type: 'box',
     className: 'info',
-    order: 2
+    order: 2,
   },
   {
     id: 13,
@@ -142,7 +142,7 @@ export const items = [
     end: '2024-01-15',
     type: 'box',
     className: 'purple',
-    order: 2
+    order: 2,
   },
 
   // Group 4: Point items with order
@@ -153,7 +153,7 @@ export const items = [
     start: '2024-02-15',
     type: 'point',
     className: 'danger',
-    order: 1
+    order: 1,
   },
   {
     id: 15,
@@ -162,7 +162,7 @@ export const items = [
     start: '2024-01-15',
     type: 'point',
     className: 'warning',
-    order: 2
+    order: 2,
   },
   {
     id: 16,
@@ -171,7 +171,7 @@ export const items = [
     start: '2024-01-01',
     type: 'point',
     className: 'success',
-    order: 3
+    order: 3,
   },
   {
     id: 17,
@@ -179,7 +179,7 @@ export const items = [
     group: 4,
     start: '2024-02-01',
     type: 'point',
-    className: 'info'
+    className: 'info',
   },
   {
     id: 18,
@@ -187,7 +187,7 @@ export const items = [
     group: 4,
     start: '2024-02-08',
     type: 'point',
-    className: 'purple'
+    className: 'purple',
   },
 
   // Group 5: Overlapping items with explicit order for compact mode testing
@@ -199,7 +199,7 @@ export const items = [
     end: '2024-01-15',
     type: 'box',
     className: 'danger',
-    order: 1
+    order: 1,
   },
   {
     id: 20,
@@ -209,7 +209,7 @@ export const items = [
     end: '2024-02-05',
     type: 'box',
     className: 'danger',
-    order: 1
+    order: 1,
   },
   {
     id: 21,
@@ -219,7 +219,7 @@ export const items = [
     end: '2024-01-10',
     type: 'box',
     className: 'warning',
-    order: 2
+    order: 2,
   },
   {
     id: 22,
@@ -229,7 +229,7 @@ export const items = [
     end: '2024-02-01',
     type: 'box',
     className: 'warning',
-    order: 2
+    order: 2,
   },
   {
     id: 23,
@@ -239,7 +239,7 @@ export const items = [
     end: '2024-01-25',
     type: 'box',
     className: 'info',
-    order: 3
+    order: 3,
   },
   {
     id: 24,
@@ -249,8 +249,8 @@ export const items = [
     end: '2024-02-10',
     type: 'box',
     className: 'info',
-    order: 3
-  }
+    order: 3,
+  },
 ];
 
 export const groups = [
@@ -258,7 +258,7 @@ export const groups = [
   { id: 2, content: 'Mixed Ordered/Unordered', value: 2 },
   { id: 3, content: 'Same Order Values', value: 3 },
   { id: 4, content: 'Point Items with Order', value: 4 },
-  { id: 5, content: 'Compact Mode Test', value: 5 }
+  { id: 5, content: 'Compact Mode Test', value: 5 },
 ];
 
 export const description = 'Order field controls stacking priority - lower order = earlier rows';

@@ -489,7 +489,7 @@ function findCellIndex(date: Date, timeCells: TimeCell[], inclusive = false): nu
 
   if (timeCells.length > 0) {
     const firstCell = timeCells[0];
-    const lastCell = timeCells[timeCells.length - 1];
+    const lastCell = timeCells.at(-1);
     if (firstCell && date < firstCell.start) return 0;
     if (lastCell && date >= lastCell.end) return timeCells.length - 1;
   }
@@ -794,21 +794,21 @@ function escapeHtml(text: string): string {
   }
   // Fallback for Node.js
   return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
 }
 
 function escapeAttribute(value: string | number): string {
   // Escape for use in HTML attributes (handles quotes and special chars)
   return String(value)
-    .replace(/&/g, '&amp;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
+    .replaceAll('&', '&amp;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;');
 }
 
 function renderItemBar(
@@ -1191,7 +1191,7 @@ export function fixOverflowingText(container?: Element, prefix = 'tl'): void {
       continue;
     }
 
-    const content = item.querySelector(`.${prefix}-item-content`) as HTMLElement;
+    const content = item.querySelector(`.${prefix}-item-content`)!;
     if (content) {
       // First, ensure text is positioned inside to measure correctly
       item.classList.remove(`${prefix}-item--text-outside`);
@@ -1199,7 +1199,7 @@ export function fixOverflowingText(container?: Element, prefix = 'tl'): void {
       // Force synchronous layout recalculation by reading offsetWidth.
       // This ensures the browser computes the new layout before we measure scrollWidth.
       // The void operator discards the value to satisfy linters.
-      void content.offsetWidth;
+      void (content as HTMLElement).offsetWidth;
 
       // Check if text is truncated (content wider than box allows)
       const isTruncated = content.scrollWidth > content.clientWidth + 1;
@@ -1876,9 +1876,9 @@ export function exportTimelineToPptx(
 
   // Draw vertical date dividers
   const firstBodyRow = bodyRows[0];
-  const lastBodyRow = bodyRows[bodyRows.length - 1];
+  const lastBodyRow = Array.from(bodyRows).at(-1);
   // Use the last header row (main date labels, not group row) for column positions
-  const mainHeaderRow = headerRows[headerRows.length - 1];
+  const mainHeaderRow = Array.from(headerRows).at(-1);
   if (firstBodyRow && lastBodyRow && mainHeaderRow) {
     const firstRowRect = firstBodyRow.getBoundingClientRect();
     const lastRowRect = lastBodyRow.getBoundingClientRect();

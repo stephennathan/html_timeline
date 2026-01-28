@@ -17,7 +17,7 @@ export const items = [
     group: 'exec',
     start: '2024-01-15',
     type: 'point',
-    className: 'purple'
+    className: 'purple',
   },
   {
     id: 2,
@@ -25,7 +25,7 @@ export const items = [
     group: 'exec',
     start: '2024-02-20',
     type: 'point',
-    className: 'danger'
+    className: 'danger',
   },
   {
     id: 3,
@@ -33,7 +33,7 @@ export const items = [
     group: 'exec',
     start: '2024-03-15',
     type: 'point',
-    className: 'success'
+    className: 'success',
   },
 
   // Product Team
@@ -43,7 +43,7 @@ export const items = [
     group: 'product',
     start: '2024-01-08',
     end: '2024-01-19',
-    type: 'box'
+    type: 'box',
   },
   {
     id: 5,
@@ -52,7 +52,7 @@ export const items = [
     start: '2024-01-22',
     end: '2024-02-02',
     type: 'box',
-    className: 'info'
+    className: 'info',
   },
   {
     id: 6,
@@ -61,7 +61,7 @@ export const items = [
     start: '2024-02-05',
     end: '2024-02-23',
     type: 'box',
-    className: 'pink'
+    className: 'pink',
   },
   { id: 7, content: 'Design Review', group: 'product', start: '2024-02-26', type: 'point' },
 
@@ -72,7 +72,7 @@ export const items = [
     group: 'eng-be',
     start: '2024-01-15',
     end: '2024-03-15',
-    type: 'box'
+    type: 'box',
   },
   {
     id: 9,
@@ -81,7 +81,7 @@ export const items = [
     start: '2024-02-01',
     end: '2024-02-28',
     type: 'box',
-    className: 'danger'
+    className: 'danger',
   },
   {
     id: 10,
@@ -90,7 +90,7 @@ export const items = [
     start: '2024-03-01',
     end: '2024-03-22',
     type: 'box',
-    className: 'warning'
+    className: 'warning',
   },
 
   // Engineering - Frontend
@@ -101,7 +101,7 @@ export const items = [
     start: '2024-01-08',
     end: '2024-02-16',
     type: 'box',
-    className: 'info'
+    className: 'info',
   },
   {
     id: 12,
@@ -110,7 +110,7 @@ export const items = [
     start: '2024-02-19',
     end: '2024-03-15',
     type: 'box',
-    className: 'purple'
+    className: 'purple',
   },
   {
     id: 13,
@@ -119,7 +119,7 @@ export const items = [
     start: '2024-03-04',
     end: '2024-03-29',
     type: 'box',
-    className: 'pink'
+    className: 'pink',
   },
 
   // Engineering - Platform
@@ -130,7 +130,7 @@ export const items = [
     start: '2024-01-15',
     end: '2024-02-09',
     type: 'box',
-    className: 'warning'
+    className: 'warning',
   },
   {
     id: 15,
@@ -138,7 +138,7 @@ export const items = [
     group: 'eng-platform',
     start: '2024-02-12',
     end: '2024-03-22',
-    type: 'box'
+    type: 'box',
   },
   {
     id: 16,
@@ -147,7 +147,7 @@ export const items = [
     start: '2024-02-26',
     end: '2024-03-15',
     type: 'box',
-    className: 'info'
+    className: 'info',
   },
 
   // QA Team
@@ -157,7 +157,7 @@ export const items = [
     group: 'qa',
     start: '2024-01-22',
     end: '2024-02-23',
-    type: 'box'
+    type: 'box',
   },
   {
     id: 18,
@@ -166,7 +166,7 @@ export const items = [
     start: '2024-02-26',
     end: '2024-03-15',
     type: 'box',
-    className: 'warning'
+    className: 'warning',
   },
   {
     id: 19,
@@ -175,7 +175,7 @@ export const items = [
     start: '2024-03-18',
     end: '2024-03-29',
     type: 'box',
-    className: 'success'
+    className: 'success',
   },
 
   // Security Team
@@ -186,7 +186,7 @@ export const items = [
     start: '2024-02-05',
     end: '2024-02-23',
     type: 'box',
-    className: 'danger'
+    className: 'danger',
   },
   {
     id: 21,
@@ -195,7 +195,7 @@ export const items = [
     start: '2024-03-04',
     end: '2024-03-15',
     type: 'box',
-    className: 'danger'
+    className: 'danger',
   },
   {
     id: 22,
@@ -204,7 +204,7 @@ export const items = [
     start: '2024-03-18',
     end: '2024-03-29',
     type: 'box',
-    className: 'warning'
+    className: 'warning',
   },
 
   // DevOps
@@ -214,7 +214,7 @@ export const items = [
     group: 'devops',
     start: '2024-01-08',
     end: '2024-02-02',
-    type: 'box'
+    type: 'box',
   },
   {
     id: 24,
@@ -223,7 +223,7 @@ export const items = [
     start: '2024-02-05',
     end: '2024-02-23',
     type: 'box',
-    className: 'danger'
+    className: 'danger',
   },
   {
     id: 25,
@@ -232,7 +232,7 @@ export const items = [
     start: '2024-02-26',
     end: '2024-03-15',
     type: 'box',
-    className: 'success'
+    className: 'success',
   },
 
   // Data Team
@@ -243,7 +243,7 @@ export const items = [
     start: '2024-01-15',
     end: '2024-02-16',
     type: 'box',
-    className: 'purple'
+    className: 'purple',
   },
   {
     id: 27,
@@ -251,7 +251,7 @@ export const items = [
     group: 'data',
     start: '2024-02-19',
     end: '2024-03-15',
-    type: 'box'
+    type: 'box',
   },
   {
     id: 28,
@@ -260,7 +260,7 @@ export const items = [
     start: '2024-03-04',
     end: '2024-03-29',
     type: 'box',
-    className: 'info'
+    className: 'info',
   },
 
   // Design Team
@@ -271,7 +271,7 @@ export const items = [
     start: '2024-01-08',
     end: '2024-01-26',
     type: 'box',
-    className: 'pink'
+    className: 'pink',
   },
   {
     id: 30,
@@ -280,7 +280,7 @@ export const items = [
     start: '2024-01-29',
     end: '2024-02-16',
     type: 'box',
-    className: 'purple'
+    className: 'purple',
   },
   {
     id: 31,
@@ -289,7 +289,7 @@ export const items = [
     start: '2024-02-19',
     end: '2024-03-08',
     type: 'box',
-    className: 'info'
+    className: 'info',
   },
 
   // Marketing Team
@@ -299,7 +299,7 @@ export const items = [
     group: 'marketing',
     start: '2024-01-15',
     end: '2024-02-02',
-    type: 'box'
+    type: 'box',
   },
   {
     id: 33,
@@ -308,7 +308,7 @@ export const items = [
     start: '2024-02-05',
     end: '2024-03-01',
     type: 'box',
-    className: 'pink'
+    className: 'pink',
   },
   {
     id: 34,
@@ -317,7 +317,7 @@ export const items = [
     start: '2024-03-04',
     end: '2024-03-29',
     type: 'box',
-    className: 'success'
+    className: 'success',
   },
 
   // Sales Team
@@ -328,7 +328,7 @@ export const items = [
     start: '2024-02-19',
     end: '2024-03-01',
     type: 'box',
-    className: 'info'
+    className: 'info',
   },
   {
     id: 36,
@@ -336,7 +336,7 @@ export const items = [
     group: 'sales',
     start: '2024-03-04',
     end: '2024-03-22',
-    type: 'box'
+    type: 'box',
   },
   {
     id: 37,
@@ -344,7 +344,7 @@ export const items = [
     group: 'sales',
     start: '2024-03-25',
     type: 'point',
-    className: 'success'
+    className: 'success',
   },
 
   // Customer Success
@@ -355,7 +355,7 @@ export const items = [
     start: '2024-02-12',
     end: '2024-03-08',
     type: 'box',
-    className: 'info'
+    className: 'info',
   },
   {
     id: 39,
@@ -364,7 +364,7 @@ export const items = [
     start: '2024-03-11',
     end: '2024-03-29',
     type: 'box',
-    className: 'purple'
+    className: 'purple',
   },
 
   // Legal
@@ -375,7 +375,7 @@ export const items = [
     start: '2024-01-08',
     end: '2024-01-26',
     type: 'box',
-    className: 'warning'
+    className: 'warning',
   },
   {
     id: 41,
@@ -383,7 +383,7 @@ export const items = [
     group: 'legal',
     start: '2024-02-05',
     end: '2024-02-16',
-    type: 'box'
+    type: 'box',
   },
   {
     id: 42,
@@ -391,7 +391,7 @@ export const items = [
     group: 'legal',
     start: '2024-03-04',
     type: 'point',
-    className: 'success'
+    className: 'success',
   },
 
   // HR
@@ -401,7 +401,7 @@ export const items = [
     group: 'hr',
     start: '2024-01-15',
     end: '2024-02-16',
-    type: 'box'
+    type: 'box',
   },
   {
     id: 44,
@@ -410,7 +410,7 @@ export const items = [
     start: '2024-02-19',
     end: '2024-03-15',
     type: 'box',
-    className: 'info'
+    className: 'info',
   },
 
   // Key Milestones (across all)
@@ -420,7 +420,7 @@ export const items = [
     group: 'exec',
     start: '2024-02-02',
     type: 'point',
-    className: 'success'
+    className: 'success',
   },
   {
     id: 46,
@@ -428,7 +428,7 @@ export const items = [
     group: 'exec',
     start: '2024-03-01',
     type: 'point',
-    className: 'success'
+    className: 'success',
   },
   {
     id: 47,
@@ -436,8 +436,8 @@ export const items = [
     group: 'exec',
     start: '2024-03-29',
     type: 'point',
-    className: 'success'
-  }
+    className: 'success',
+  },
 ];
 
 export const groups = [
@@ -455,7 +455,7 @@ export const groups = [
   { id: 'sales', content: 'Sales', value: 12 },
   { id: 'cs', content: 'Customer Success', value: 13 },
   { id: 'legal', content: 'Legal', value: 14 },
-  { id: 'hr', content: 'Human Resources', value: 15 }
+  { id: 'hr', content: 'Human Resources', value: 15 },
 ];
 
 export const description =

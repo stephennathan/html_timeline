@@ -21,7 +21,7 @@ export const items = [
     group: 1,
     start: '2024-05-01',
     end: '2024-05-01',
-    type: 'box'
+    type: 'box',
   },
   {
     id: 2,
@@ -30,7 +30,7 @@ export const items = [
     start: '2024-05-03',
     end: '2024-05-03',
     type: 'box',
-    className: 'info'
+    className: 'info',
   },
 
   // Point items clustering
@@ -42,7 +42,7 @@ export const items = [
     group: 1,
     start: '2024-05-06',
     type: 'point',
-    className: 'purple'
+    className: 'purple',
   },
 
   // Background items
@@ -52,7 +52,7 @@ export const items = [
     group: 2,
     start: '2024-05-13',
     end: '2024-05-17',
-    type: 'background'
+    type: 'background',
   },
   {
     id: 7,
@@ -61,7 +61,7 @@ export const items = [
     start: '2024-05-27',
     end: '2024-05-31',
     type: 'background',
-    className: 'warning'
+    className: 'warning',
   },
 
   // Mix of types in same group
@@ -74,7 +74,7 @@ export const items = [
     start: '2024-05-06',
     end: '2024-05-24',
     type: 'box',
-    className: 'info'
+    className: 'info',
   },
   { id: 11, content: 'Demo', group: 2, start: '2024-05-24', type: 'point', className: 'success' },
 
@@ -86,7 +86,7 @@ export const items = [
     start: '2024-05-01',
     end: '2024-05-02',
     type: 'box',
-    className: 'danger'
+    className: 'danger',
   },
   {
     id: 13,
@@ -95,7 +95,7 @@ export const items = [
     start: '2024-05-01',
     end: '2024-05-31',
     type: 'box',
-    className: 'warning'
+    className: 'warning',
   },
   {
     id: 14,
@@ -103,7 +103,7 @@ export const items = [
     group: 3,
     start: '2024-05-15',
     type: 'point',
-    className: 'danger'
+    className: 'danger',
   },
 
   // Items at exact month boundaries
@@ -116,7 +116,7 @@ export const items = [
     start: '2024-05-01',
     end: '2024-05-31',
     type: 'box',
-    className: 'purple'
+    className: 'purple',
   },
 
   // Overlapping background with regular items
@@ -127,7 +127,7 @@ export const items = [
     start: '2024-05-06',
     end: '2024-05-17',
     type: 'background',
-    className: 'info'
+    className: 'info',
   },
   { id: 19, content: 'Feature A', group: 5, start: '2024-05-06', end: '2024-05-10', type: 'box' },
   {
@@ -137,7 +137,7 @@ export const items = [
     start: '2024-05-13',
     end: '2024-05-17',
     type: 'box',
-    className: 'success'
+    className: 'success',
   },
   { id: 21, content: 'Review', group: 5, start: '2024-05-17', type: 'point', className: 'purple' },
 
@@ -148,7 +148,7 @@ export const items = [
     group: 6,
     start: '2024-05-08',
     end: '2024-05-15',
-    type: 'box'
+    type: 'box',
   },
   {
     id: 101,
@@ -156,7 +156,7 @@ export const items = [
     group: 6,
     start: '2024-05-20',
     type: 'point',
-    className: 'info'
+    className: 'info',
   },
 
   // Items with all color classes
@@ -166,7 +166,7 @@ export const items = [
     group: 7,
     start: '2024-05-01',
     end: '2024-05-04',
-    type: 'box'
+    type: 'box',
   },
   {
     id: 23,
@@ -175,7 +175,7 @@ export const items = [
     start: '2024-05-06',
     end: '2024-05-09',
     type: 'box',
-    className: 'success'
+    className: 'success',
   },
   {
     id: 24,
@@ -184,7 +184,7 @@ export const items = [
     start: '2024-05-11',
     end: '2024-05-14',
     type: 'box',
-    className: 'warning'
+    className: 'warning',
   },
   {
     id: 25,
@@ -193,7 +193,7 @@ export const items = [
     start: '2024-05-16',
     end: '2024-05-19',
     type: 'box',
-    className: 'danger'
+    className: 'danger',
   },
   {
     id: 26,
@@ -202,7 +202,7 @@ export const items = [
     start: '2024-05-21',
     end: '2024-05-24',
     type: 'box',
-    className: 'info'
+    className: 'info',
   },
   {
     id: 27,
@@ -211,7 +211,7 @@ export const items = [
     start: '2024-05-26',
     end: '2024-05-29',
     type: 'box',
-    className: 'purple'
+    className: 'purple',
   },
   {
     id: 28,
@@ -220,7 +220,7 @@ export const items = [
     start: '2024-05-31',
     end: '2024-06-03',
     type: 'box',
-    className: 'pink'
+    className: 'pink',
   },
 
   // Adjacent items (end date = next start date)
@@ -232,7 +232,7 @@ export const items = [
     start: '2024-05-10',
     end: '2024-05-20',
     type: 'box',
-    className: 'info'
+    className: 'info',
   },
   {
     id: 31,
@@ -241,7 +241,7 @@ export const items = [
     start: '2024-05-20',
     end: '2024-05-31',
     type: 'box',
-    className: 'purple'
+    className: 'purple',
   },
 
   // Empty content (should still render)
@@ -252,7 +252,7 @@ export const items = [
     start: '2024-05-10',
     end: '2024-05-15',
     type: 'box',
-    className: 'warning'
+    className: 'warning',
   },
   { id: 33, content: '', group: 9, start: '2024-05-20', type: 'point', className: 'danger' },
 
@@ -263,7 +263,7 @@ export const items = [
     group: 10,
     start: '2024-05-05',
     end: '2024-05-10',
-    type: 'box'
+    type: 'box',
   },
   {
     id: 35,
@@ -272,7 +272,7 @@ export const items = [
     start: '2024-05-12',
     end: '2024-05-17',
     type: 'box',
-    className: 'info'
+    className: 'info',
   },
   {
     id: 36,
@@ -281,7 +281,7 @@ export const items = [
     start: '2024-05-19',
     end: '2024-05-24',
     type: 'box',
-    className: 'purple'
+    className: 'purple',
   },
   {
     id: 37,
@@ -289,8 +289,8 @@ export const items = [
     group: 10,
     start: '2024-05-26',
     type: 'point',
-    className: 'success'
-  }
+    className: 'success',
+  },
 ];
 
 export const groups = [
@@ -304,7 +304,7 @@ export const groups = [
   { id: 8, content: 'Adjacent Phases', value: 8 },
   { id: 9, content: 'Empty Content', value: 9 },
   { id: 10, content: 'Special Characters', value: 10 },
-  { id: 11, content: 'Empty Group (No Items)', value: 11 } // Intentionally no items
+  { id: 11, content: 'Empty Group (No Items)', value: 11 }, // Intentionally no items
 ];
 
 export const description =

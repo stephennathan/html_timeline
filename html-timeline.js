@@ -13,7 +13,7 @@ function normalizeDate(date) {
   return new Date(date);
 }
 function daysBetween(start, end) {
-  const MS_PER_DAY = 86400000;
+  const MS_PER_DAY = 86_400_000;
   return (end.getTime() - start.getTime()) / MS_PER_DAY;
 }
 function alignToGranularity(date, granularity, weekStartDay = 0) {
@@ -251,7 +251,7 @@ function findCellIndex(date, timeCells, inclusive = false) {
   }
   if (timeCells.length > 0) {
     const firstCell = timeCells[0];
-    const lastCell = timeCells[timeCells.length - 1];
+    const lastCell = timeCells.at(-1);
     if (firstCell && date < firstCell.start) return 0;
     if (lastCell && date >= lastCell.end) return timeCells.length - 1;
   }
@@ -499,20 +499,20 @@ function escapeHtml(text) {
   }
   // Fallback for Node.js
   return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
 }
 function escapeAttribute(value) {
   // Escape for use in HTML attributes (handles quotes and special chars)
   return String(value)
-    .replace(/&/g, '&amp;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
+    .replaceAll('&', '&amp;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;');
 }
 function renderItemBar(span, timeCells, stackDepth, prefix) {
   const { item } = span;
@@ -1386,16 +1386,16 @@ export function exportTimelineToPptx(container, pptx, options = {}) {
   }
   // Draw vertical date dividers
   const firstBodyRow = bodyRows[0];
-  const lastBodyRow = bodyRows[bodyRows.length - 1];
+  const lastBodyRow = bodyRows.at(-1);
   // Use the last header row (main date labels, not group row) for column positions
-  const mainHeaderRow = headerRows[headerRows.length - 1];
+  const mainHeaderRow = headerRows.at(-1);
   if (firstBodyRow && lastBodyRow && mainHeaderRow) {
     const firstRowRect = firstBodyRow.getBoundingClientRect();
     const lastRowRect = lastBodyRow.getBoundingClientRect();
     const gridStartY = firstRowRect.top - tableRect.top;
     const gridEndY = lastRowRect.bottom - tableRect.top;
-    mainHeaderRow.querySelectorAll('th').forEach((th, index) => {
-      if (index === 0) return; // Skip group label column
+    for (const [index, th] of mainHeaderRow.querySelectorAll('th').entries()) {
+      if (index === 0) continue; // Skip group label column
       const thRect = th.getBoundingClientRect();
       const cellX = thRect.left - tableRect.left;
       slide.addShape(pptx.ShapeType.line, {
@@ -1405,7 +1405,7 @@ export function exportTimelineToPptx(container, pptx, options = {}) {
         h: toInchH(gridEndY - gridStartY),
         line: { color: 'eaeef2', pt: 0.5 },
       });
-    });
+    }
     // Right edge of last column
     const lastTh = mainHeaderRow.querySelector('th:last-child');
     if (lastTh) {

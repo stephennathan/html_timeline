@@ -16,7 +16,7 @@ export const items = [
     group: 1,
     start: '2024-01-08',
     end: '2024-01-26',
-    type: 'box'
+    type: 'box',
   },
   {
     id: 2,
@@ -25,7 +25,7 @@ export const items = [
     start: '2024-01-08',
     end: '2024-01-19',
     type: 'box',
-    className: 'info'
+    className: 'info',
   },
   {
     id: 3,
@@ -34,7 +34,7 @@ export const items = [
     start: '2024-01-08',
     end: '2024-01-12',
     type: 'box',
-    className: 'purple'
+    className: 'purple',
   },
   {
     id: 4,
@@ -43,7 +43,7 @@ export const items = [
     start: '2024-01-08',
     end: '2024-01-15',
     type: 'box',
-    className: 'warning'
+    className: 'warning',
   },
   {
     id: 5,
@@ -51,7 +51,7 @@ export const items = [
     group: 1,
     start: '2024-01-08',
     type: 'point',
-    className: 'success'
+    className: 'success',
   },
 
   // Sprint 1 - Overlapping mid-sprint items
@@ -61,7 +61,7 @@ export const items = [
     group: 1,
     start: '2024-01-15',
     end: '2024-01-26',
-    type: 'box'
+    type: 'box',
   },
   {
     id: 7,
@@ -70,7 +70,7 @@ export const items = [
     start: '2024-01-15',
     end: '2024-01-22',
     type: 'box',
-    className: 'info'
+    className: 'info',
   },
   {
     id: 8,
@@ -79,7 +79,7 @@ export const items = [
     start: '2024-01-18',
     end: '2024-01-26',
     type: 'box',
-    className: 'pink'
+    className: 'pink',
   },
   {
     id: 9,
@@ -87,7 +87,7 @@ export const items = [
     group: 1,
     start: '2024-01-26',
     type: 'point',
-    className: 'success'
+    className: 'success',
   },
 
   // Sprint 2 - Dense overlapping
@@ -98,7 +98,7 @@ export const items = [
     start: '2024-01-29',
     end: '2024-02-16',
     type: 'box',
-    className: 'danger'
+    className: 'danger',
   },
   {
     id: 11,
@@ -106,7 +106,7 @@ export const items = [
     group: 2,
     start: '2024-01-29',
     end: '2024-02-09',
-    type: 'box'
+    type: 'box',
   },
   {
     id: 12,
@@ -115,7 +115,7 @@ export const items = [
     start: '2024-01-29',
     end: '2024-02-09',
     type: 'box',
-    className: 'purple'
+    className: 'purple',
   },
   {
     id: 13,
@@ -124,7 +124,7 @@ export const items = [
     start: '2024-02-05',
     end: '2024-02-16',
     type: 'box',
-    className: 'info'
+    className: 'info',
   },
   {
     id: 14,
@@ -133,7 +133,7 @@ export const items = [
     start: '2024-02-05',
     end: '2024-02-12',
     type: 'box',
-    className: 'warning'
+    className: 'warning',
   },
   {
     id: 15,
@@ -142,7 +142,7 @@ export const items = [
     start: '2024-02-08',
     end: '2024-02-16',
     type: 'box',
-    className: 'pink'
+    className: 'pink',
   },
   {
     id: 16,
@@ -150,7 +150,7 @@ export const items = [
     group: 2,
     start: '2024-01-29',
     type: 'point',
-    className: 'success'
+    className: 'success',
   },
   { id: 17, content: 'Mid-Sprint Review', group: 2, start: '2024-02-07', type: 'point' },
   {
@@ -159,7 +159,7 @@ export const items = [
     group: 2,
     start: '2024-02-16',
     type: 'point',
-    className: 'success'
+    className: 'success',
   },
 
   // Sprint 3 - Even denser
@@ -169,7 +169,7 @@ export const items = [
     group: 3,
     start: '2024-02-19',
     end: '2024-03-01',
-    type: 'box'
+    type: 'box',
   },
   {
     id: 20,
@@ -178,7 +178,7 @@ export const items = [
     start: '2024-02-19',
     end: '2024-03-01',
     type: 'box',
-    className: 'danger'
+    className: 'danger',
   },
   {
     id: 21,
@@ -187,7 +187,7 @@ export const items = [
     start: '2024-02-19',
     end: '2024-02-26',
     type: 'box',
-    className: 'warning'
+    className: 'warning',
   },
   {
     id: 22,
@@ -196,7 +196,7 @@ export const items = [
     start: '2024-02-19',
     end: '2024-03-01',
     type: 'box',
-    className: 'pink'
+    className: 'pink',
   },
   {
     id: 23,
@@ -205,7 +205,7 @@ export const items = [
     start: '2024-02-22',
     end: '2024-03-01',
     type: 'box',
-    className: 'purple'
+    className: 'purple',
   },
   {
     id: 24,
@@ -214,7 +214,7 @@ export const items = [
     start: '2024-02-22',
     end: '2024-02-28',
     type: 'box',
-    className: 'info'
+    className: 'info',
   },
   {
     id: 25,
@@ -223,7 +223,7 @@ export const items = [
     start: '2024-02-26',
     end: '2024-03-01',
     type: 'box',
-    className: 'success'
+    className: 'success',
   },
   {
     id: 26,
@@ -231,14 +231,14 @@ export const items = [
     group: 3,
     start: '2024-03-01',
     type: 'point',
-    className: 'success'
-  }
+    className: 'success',
+  },
 ];
 
 export const groups = [
   { id: 1, content: 'Sprint 1 (Jan 8-26)', value: 1 },
   { id: 2, content: 'Sprint 2 (Jan 29 - Feb 16)', value: 2 },
-  { id: 3, content: 'Sprint 3 (Feb 19 - Mar 1)', value: 3 }
+  { id: 3, content: 'Sprint 3 (Feb 19 - Mar 1)', value: 3 },
 ];
 
 export const description = 'Dense overlapping items - tests stacking with many concurrent tasks';

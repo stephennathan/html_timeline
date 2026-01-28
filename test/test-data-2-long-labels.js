@@ -17,7 +17,7 @@ export const items = [
     group: 1,
     start: '2024-03-01',
     end: '2024-03-03',
-    type: 'box'
+    type: 'box',
   },
   {
     id: 2,
@@ -26,7 +26,7 @@ export const items = [
     start: '2024-03-04',
     end: '2024-03-08',
     type: 'box',
-    className: 'info'
+    className: 'info',
   },
   {
     id: 3,
@@ -35,7 +35,7 @@ export const items = [
     start: '2024-03-11',
     end: '2024-03-13',
     type: 'box',
-    className: 'purple'
+    className: 'purple',
   },
 
   // Long labels on point items
@@ -45,14 +45,14 @@ export const items = [
     group: 1,
     start: '2024-03-15',
     type: 'point',
-    className: 'success'
+    className: 'success',
   },
   {
     id: 5,
     content: 'Stakeholder Sign-off on Technical Requirements Document v2.0',
     group: 1,
     start: '2024-03-18',
-    type: 'point'
+    type: 'point',
   },
 
   // Mix of long and short labels
@@ -64,7 +64,7 @@ export const items = [
     start: '2024-03-25',
     end: '2024-04-05',
     type: 'box',
-    className: 'warning'
+    className: 'warning',
   },
   {
     id: 8,
@@ -73,7 +73,7 @@ export const items = [
     start: '2024-04-01',
     end: '2024-04-12',
     type: 'box',
-    className: 'info'
+    className: 'info',
   },
   {
     id: 9,
@@ -82,7 +82,7 @@ export const items = [
     start: '2024-04-08',
     end: '2024-04-15',
     type: 'box',
-    className: 'pink'
+    className: 'pink',
   },
 
   // Extremely long labels
@@ -94,7 +94,7 @@ export const items = [
     start: '2024-04-01',
     end: '2024-04-02',
     type: 'box',
-    className: 'purple'
+    className: 'purple',
   },
   {
     id: 11,
@@ -104,7 +104,7 @@ export const items = [
     start: '2024-04-03',
     end: '2024-04-05',
     type: 'box',
-    className: 'danger'
+    className: 'danger',
   },
 
   // Long labels with overlapping dates (stacking challenge)
@@ -115,7 +115,7 @@ export const items = [
     start: '2024-04-15',
     end: '2024-04-22',
     type: 'box',
-    className: 'danger'
+    className: 'danger',
   },
   {
     id: 13,
@@ -124,7 +124,7 @@ export const items = [
     start: '2024-04-15',
     end: '2024-04-19',
     type: 'box',
-    className: 'warning'
+    className: 'warning',
   },
   {
     id: 14,
@@ -133,7 +133,7 @@ export const items = [
     start: '2024-04-18',
     end: '2024-04-25',
     type: 'box',
-    className: 'info'
+    className: 'info',
   },
   {
     id: 15,
@@ -142,7 +142,7 @@ export const items = [
     start: '2024-04-25',
     end: '2024-04-26',
     type: 'box',
-    className: 'success'
+    className: 'success',
   },
   {
     id: 16,
@@ -150,7 +150,7 @@ export const items = [
     group: 4,
     start: '2024-04-26',
     type: 'point',
-    className: 'success'
+    className: 'success',
   },
 
   // Additional items for documentation and training
@@ -161,7 +161,7 @@ export const items = [
     start: '2024-04-29',
     end: '2024-05-03',
     type: 'box',
-    className: 'info'
+    className: 'info',
   },
   {
     id: 18,
@@ -170,7 +170,7 @@ export const items = [
     start: '2024-04-29',
     end: '2024-05-06',
     type: 'box',
-    className: 'purple'
+    className: 'purple',
   },
   {
     id: 19,
@@ -178,7 +178,7 @@ export const items = [
     group: 5,
     start: '2024-05-01',
     end: '2024-05-08',
-    type: 'box'
+    type: 'box',
   },
   {
     id: 20,
@@ -187,7 +187,7 @@ export const items = [
     start: '2024-05-06',
     end: '2024-05-10',
     type: 'box',
-    className: 'success'
+    className: 'success',
   },
   {
     id: 21,
@@ -195,7 +195,7 @@ export const items = [
     group: 5,
     start: '2024-05-10',
     type: 'point',
-    className: 'success'
+    className: 'success',
   },
 
   // Release and communication items
@@ -206,7 +206,7 @@ export const items = [
     start: '2024-05-13',
     end: '2024-05-14',
     type: 'box',
-    className: 'warning'
+    className: 'warning',
   },
   {
     id: 23,
@@ -216,7 +216,7 @@ export const items = [
     start: '2024-05-15',
     end: '2024-05-17',
     type: 'box',
-    className: 'info'
+    className: 'info',
   },
   {
     id: 24,
@@ -225,7 +225,7 @@ export const items = [
     start: '2024-05-15',
     end: '2024-05-22',
     type: 'box',
-    className: 'purple'
+    className: 'purple',
   },
   {
     id: 25,
@@ -234,7 +234,7 @@ export const items = [
     start: '2024-05-20',
     end: '2024-05-24',
     type: 'box',
-    className: 'pink'
+    className: 'pink',
   },
   {
     id: 26,
@@ -243,7 +243,7 @@ export const items = [
     group: 6,
     start: '2024-05-27',
     end: '2024-05-28',
-    type: 'box'
+    type: 'box',
   },
 
   // Post-launch monitoring
@@ -253,7 +253,7 @@ export const items = [
     group: 6,
     start: '2024-05-28',
     type: 'point',
-    className: 'success'
+    className: 'success',
   },
   {
     id: 28,
@@ -262,7 +262,7 @@ export const items = [
     start: '2024-05-01',
     end: '2024-05-08',
     type: 'box',
-    className: 'danger'
+    className: 'danger',
   },
   {
     id: 29,
@@ -271,7 +271,7 @@ export const items = [
     start: '2024-05-06',
     end: '2024-05-13',
     type: 'box',
-    className: 'warning'
+    className: 'warning',
   },
   {
     id: 30,
@@ -280,8 +280,8 @@ export const items = [
     start: '2024-05-13',
     end: '2024-05-17',
     type: 'box',
-    className: 'info'
-  }
+    className: 'info',
+  },
 ];
 
 export const groups = [
@@ -290,7 +290,7 @@ export const groups = [
   { id: 3, content: 'Strategic Reviews', value: 3 },
   { id: 4, content: 'Security & Performance', value: 4 },
   { id: 5, content: 'Documentation & Training', value: 5 },
-  { id: 6, content: 'Release & Communication', value: 6 }
+  { id: 6, content: 'Release & Communication', value: 6 },
 ];
 
 export const description =
