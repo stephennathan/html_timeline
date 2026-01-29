@@ -489,7 +489,7 @@ function findCellIndex(date: Date, timeCells: TimeCell[], inclusive = false): nu
 
   if (timeCells.length > 0) {
     const firstCell = timeCells[0];
-    const lastCell = timeCells.at(-1);
+    const lastCell = timeCells[timeCells.length - 1];
     if (firstCell && date < firstCell.start) return 0;
     if (lastCell && date >= lastCell.end) return timeCells.length - 1;
   }
@@ -1876,9 +1876,11 @@ export function exportTimelineToPptx(
 
   // Draw vertical date dividers
   const firstBodyRow = bodyRows[0];
-  const lastBodyRow = Array.from(bodyRows).at(-1);
+  const bodyRowsArray = Array.from(bodyRows);
+  const lastBodyRow = bodyRowsArray[bodyRowsArray.length - 1];
   // Use the last header row (main date labels, not group row) for column positions
-  const mainHeaderRow = Array.from(headerRows).at(-1);
+  const headerRowsArray = Array.from(headerRows);
+  const mainHeaderRow = headerRowsArray[headerRowsArray.length - 1];
   if (firstBodyRow && lastBodyRow && mainHeaderRow) {
     const firstRowRect = firstBodyRow.getBoundingClientRect();
     const lastRowRect = lastBodyRow.getBoundingClientRect();
