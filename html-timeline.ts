@@ -16,22 +16,31 @@ export type TimelineItemType = 'box' | 'point' | 'range' | 'background';
 /** Time granularity levels */
 export type TimeGranularity = 'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year';
 
+/** Group ordering options */
+export type GroupOrderOption = 'value' | 'content' | 'id';
+
+/** Timeline date value - accepts Date object, ISO string, or timestamp */
+export type TimelineDate = Date | string | number;
+
+/** Timeline ID value - accepts string or numeric identifier */
+export type TimelineId = string | number;
+
 /**
  * Timeline item - vis-timeline compatible structure
  */
 export interface TimelineItem {
   /** Unique identifier for the item */
-  id: string | number;
+  id: TimelineId;
   /** Display content (text or HTML) */
   content: string;
   /** Start date/time of the item */
-  start: Date | string | number;
+  start: TimelineDate;
   /** End date/time (optional for point items) */
-  end?: Date | string | number;
+  end?: TimelineDate;
   /** Item display type */
   type?: TimelineItemType;
   /** Group ID this item belongs to */
-  group?: string | number;
+  group?: TimelineId;
   /** CSS class name(s) for styling */
   className?: string;
   /** Custom inline styles */
@@ -86,7 +95,7 @@ export interface TimelineOptions {
   /** Week start day (0=Sunday, 1=Monday) */
   weekStartDay?: 0 | 1 | 2 | 3 | 4 | 5 | 6;
   /** Group ordering: 'value' or 'content' */
-  groupOrder?: 'value' | 'content' | 'id';
+  groupOrder?: GroupOrderOption;
   /**
    * Enable compact stacking to fit more items on the same row.
    * When true, items only avoid overlapping their actual bars/dots,
@@ -643,14 +652,8 @@ function getEffectiveBounds(
 
   if (span.labelLeft) {
     // Label is on the left - extends leftward from the start
-    let effectiveStart: number;
-    if (span.item.isPoint) {
-      // Point: label extends left from the dot position
-      effectiveStart = startPercent - textPercent;
-    } else {
-      // Box/range: label extends left from the start of the bar
-      effectiveStart = startPercent - textPercent;
-    }
+    // Both point and box/range items extend left from the start position
+    const effectiveStart = startPercent - textPercent;
     return [effectiveStart, endPercent];
   } else {
     // Label is on the right (default) - extends rightward
