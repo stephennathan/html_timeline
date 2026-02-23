@@ -9,22 +9,28 @@
 export type TimelineItemType = 'box' | 'point' | 'range' | 'background';
 /** Time granularity levels */
 export type TimeGranularity = 'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year';
+/** Group ordering options */
+export type GroupOrderOption = 'value' | 'content' | 'id';
+/** Timeline date value - accepts Date object, ISO string, or timestamp */
+export type TimelineDate = Date | string | number;
+/** Timeline ID value - accepts string or numeric identifier */
+export type TimelineId = string | number;
 /**
  * Timeline item - vis-timeline compatible structure
  */
 export interface TimelineItem {
   /** Unique identifier for the item */
-  id: string | number;
+  id: TimelineId;
   /** Display content (text or HTML) */
   content: string;
   /** Start date/time of the item */
-  start: Date | string | number;
+  start: TimelineDate;
   /** End date/time (optional for point items) */
-  end?: Date | string | number;
+  end?: TimelineDate;
   /** Item display type */
   type?: TimelineItemType;
   /** Group ID this item belongs to */
-  group?: string | number;
+  group?: TimelineId;
   /** CSS class name(s) for styling */
   className?: string;
   /** Custom inline styles */
@@ -76,7 +82,7 @@ export interface TimelineOptions {
   /** Week start day (0=Sunday, 1=Monday) */
   weekStartDay?: 0 | 1 | 2 | 3 | 4 | 5 | 6;
   /** Group ordering: 'value' or 'content' */
-  groupOrder?: 'value' | 'content' | 'id';
+  groupOrder?: GroupOrderOption;
   /**
    * Enable compact stacking to fit more items on the same row.
    * When true, items only avoid overlapping their actual bars/dots,
@@ -229,6 +235,52 @@ export interface PptxExportOptions {
   titleHeight?: number;
   prefix?: string;
 }
+/** A shape (rectangle, ellipse, line) in the extracted timeline data. */
+export interface TimelineShape {
+  type: 'rect' | 'ellipse' | 'line';
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  fill?: string;
+  border?: string;
+  borderPt?: number;
+  rectRadius?: number;
+}
+/** A text element in the extracted timeline data. */
+export interface TimelineText {
+  content: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  fontSize: number;
+  bold?: boolean;
+  color: string;
+  align?: 'left' | 'center' | 'right';
+  valign?: 'top' | 'middle' | 'bottom';
+}
+/** Full slide data extracted from the DOM for backend PPTX rendering. */
+export interface TimelineSlideData {
+  title: string;
+  slideWidth: number;
+  slideHeight: number;
+  shapes: TimelineShape[];
+  texts: TimelineText[];
+}
+/**
+ * Extract timeline shapes from the DOM as JSON data for backend PPTX rendering.
+ * Mirrors the logic of exportTimelineToPptx but returns structured data instead of
+ * calling pptxgenjs methods directly.
+ *
+ * @param container - The container element or selector containing the rendered timeline
+ * @param options - Export options
+ * @returns TimelineSlideData with all shapes and texts for rendering
+ */
+export declare function extractTimelineShapes(
+  container: HTMLElement | string,
+  options?: PptxExportOptions
+): TimelineSlideData;
 /**
  * Export a rendered timeline to PowerPoint using pptxgenjs.
  * Requires pptxgenjs to be loaded (e.g., via CDN or npm).
@@ -252,5 +304,6 @@ declare const _default: {
   createResizeHandler: typeof createResizeHandler;
   mountTimeline: typeof mountTimeline;
   exportTimelineToPptx: typeof exportTimelineToPptx;
+  extractTimelineShapes: typeof extractTimelineShapes;
 };
 export default _default;

@@ -1682,7 +1682,7 @@ export function mountTimeline(
 }
 
 // ============================================================================
-// PPTX EXPORT
+// PPTX SHARED UTILITIES
 // ============================================================================
 
 // Color map for item classes
@@ -1717,6 +1717,384 @@ export interface PptxExportOptions {
   titleHeight?: number;
   prefix?: string;
 }
+
+// ============================================================================
+// PPTX SHAPE EXTRACTION (for backend rendering)
+// ============================================================================
+
+/** A shape (rectangle, ellipse, line) in the extracted timeline data. */
+export interface TimelineShape {
+  type: 'rect' | 'ellipse' | 'line';
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  fill?: string;
+  border?: string;
+  borderPt?: number;
+  rectRadius?: number;
+}
+
+/** A text element in the extracted timeline data. */
+export interface TimelineText {
+  content: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  fontSize: number;
+  bold?: boolean;
+  color: string;
+  align?: 'left' | 'center' | 'right';
+  valign?: 'top' | 'middle' | 'bottom';
+}
+
+/** Full slide data extracted from the DOM for backend PPTX rendering. */
+export interface TimelineSlideData {
+  title: string;
+  slideWidth: number;
+  slideHeight: number;
+  shapes: TimelineShape[];
+  texts: TimelineText[];
+}
+
+/**
+ * Extract timeline shapes from the DOM as JSON data for backend PPTX rendering.
+ * Mirrors the logic of exportTimelineToPptx but returns structured data instead of
+ * calling pptxgenjs methods directly.
+ *
+ * @param container - The container element or selector containing the rendered timeline
+ * @param options - Export options
+ * @returns TimelineSlideData with all shapes and texts for rendering
+ */
+export function extractTimelineShapes(
+  container: HTMLElement | string,
+  options: PptxExportOptions = {}
+): TimelineSlideData {
+  const containerElement =
+    typeof container === 'string' ? document.querySelector<HTMLElement>(container) : container;
+
+  if (!containerElement) {
+    throw new Error(`Timeline container not found: ${container}`);
+  }
+
+  const table = containerElement.querySelector('table');
+  if (!table) {
+    throw new Error('No timeline table found in container');
+  }
+
+  const {
+    title = 'Timeline',
+    slideWidth = 13.33,
+    slideHeight = 7.5,
+    margin = 0.3,
+    titleHeight = 0.6,
+    prefix = 'tl',
+  } = options;
+
+  const shapes: TimelineShape[] = [];
+  const texts: TimelineText[] = [];
+
+  // Title text
+  texts.push({
+    content: title,
+    x: margin,
+    y: margin,
+    w: slideWidth - 2 * margin,
+    h: titleHeight,
+    fontSize: 16,
+    bold: true,
+    color: '24292f',
+  });
+
+  // Get table dimensions from DOM
+  const tableRect = table.getBoundingClientRect();
+  const tableW = tableRect.width;
+  const tableH = tableRect.height;
+
+  // Calculate independent X and Y scales to fill available area
+  const availW = slideWidth - 2 * margin;
+  const availH = slideHeight - titleHeight - 2 * margin;
+  const scaleX = availW / tableW;
+  const scaleY = availH / tableH;
+
+  const pptxTableW = tableW * scaleX;
+  const pptxTableH = tableH * scaleY;
+  const tableX = margin;
+  const tableY = margin + titleHeight + 0.2;
+
+  // Helper: convert px to inches on slide
+  const toInchX = (px: number) => tableX + (px / tableW) * pptxTableW;
+  const toInchY = (py: number) => tableY + (py / tableH) * pptxTableH;
+  const toInchW = (pw: number) => (pw / tableW) * pptxTableW;
+  const toInchH = (ph: number) => (ph / tableH) * pptxTableH;
+
+  // Process header rows
+  const headerRows = table.querySelectorAll('thead tr');
+  for (const headerRow of headerRows) {
+    const headerRect = headerRow.getBoundingClientRect();
+    const headerY = headerRect.top - tableRect.top;
+    const headerH = headerRect.height;
+
+    const isGroupRow = headerRow.classList.contains(`${prefix}-header-group-row`);
+    const bgColor = isGroupRow ? 'eaeef2' : 'f6f8fa';
+
+    shapes.push({
+      type: 'rect',
+      x: tableX,
+      y: toInchY(headerY),
+      w: pptxTableW,
+      h: toInchH(headerH),
+      fill: bgColor,
+      border: 'd0d7de',
+      borderPt: 0.5,
+    });
+
+    for (const th of headerRow.querySelectorAll('th')) {
+      const thRect = th.getBoundingClientRect();
+      const cellX = thRect.left - tableRect.left;
+      const cellW = thRect.width;
+      const cellH = thRect.height;
+      const cellY = thRect.top - tableRect.top;
+
+      texts.push({
+        content: th.textContent || '',
+        x: toInchX(cellX),
+        y: toInchY(cellY),
+        w: toInchW(cellW),
+        h: toInchH(cellH),
+        fontSize: isGroupRow ? 9 : 8,
+        bold: true,
+        color: '24292f',
+        align: 'center',
+        valign: 'middle',
+      });
+    }
+  }
+
+  // Process body rows
+  const bodyRows = table.querySelectorAll('tbody tr');
+  for (const [rowIndex, row] of bodyRows.entries()) {
+    const rowRect = row.getBoundingClientRect();
+    const rowY = rowRect.top - tableRect.top;
+    const rowH = rowRect.height;
+
+    const bgColor = rowIndex % 2 === 0 ? 'FFFFFF' : 'f6f8fa';
+    shapes.push({
+      type: 'rect',
+      x: tableX,
+      y: toInchY(rowY),
+      w: pptxTableW,
+      h: toInchH(rowH),
+      fill: bgColor,
+      border: 'eaeef2',
+      borderPt: 0.25,
+    });
+
+    // Group label
+    const groupLabel = row.querySelector(`.${prefix}-group-label`);
+    if (groupLabel) {
+      const labelRect = groupLabel.getBoundingClientRect();
+      const labelX = labelRect.left - tableRect.left;
+      const labelW = labelRect.width;
+
+      shapes.push({
+        type: 'rect',
+        x: toInchX(labelX),
+        y: toInchY(rowY),
+        w: toInchW(labelW),
+        h: toInchH(rowH),
+        fill: 'f6f8fa',
+        border: 'd0d7de',
+        borderPt: 0.5,
+      });
+
+      texts.push({
+        content: groupLabel.textContent || '',
+        x: toInchX(labelX) + 0.05,
+        y: toInchY(rowY),
+        w: toInchW(labelW) - 0.1,
+        h: toInchH(rowH),
+        fontSize: 8,
+        bold: true,
+        color: '24292f',
+        valign: 'middle',
+      });
+    }
+  }
+
+  // Draw vertical date dividers
+  const firstBodyRow = bodyRows[0];
+  const bodyRowsArray = [...bodyRows];
+  const lastBodyRow = bodyRowsArray.at(-1);
+  const headerRowsArray = [...headerRows];
+  const mainHeaderRow = headerRowsArray.at(-1);
+  if (firstBodyRow && lastBodyRow && mainHeaderRow) {
+    const firstRowRect = firstBodyRow.getBoundingClientRect();
+    const lastRowRect = lastBodyRow.getBoundingClientRect();
+    const gridStartY = firstRowRect.top - tableRect.top;
+    const gridEndY = lastRowRect.bottom - tableRect.top;
+
+    mainHeaderRow.querySelectorAll('th').forEach((th: Element, index: number) => {
+      if (index === 0) return;
+
+      const thRect = th.getBoundingClientRect();
+      const cellX = thRect.left - tableRect.left;
+
+      shapes.push({
+        type: 'line',
+        x: toInchX(cellX),
+        y: toInchY(gridStartY),
+        w: 0,
+        h: toInchH(gridEndY - gridStartY),
+        border: 'eaeef2',
+        borderPt: 0.5,
+      });
+    });
+
+    // Right edge of last column
+    const lastTh = mainHeaderRow.querySelector('th:last-child');
+    if (lastTh) {
+      const lastThRect = lastTh.getBoundingClientRect();
+      const rightEdge = lastThRect.right - tableRect.left;
+      shapes.push({
+        type: 'line',
+        x: toInchX(rightEdge),
+        y: toInchY(gridStartY),
+        w: 0,
+        h: toInchH(gridEndY - gridStartY),
+        border: 'eaeef2',
+        borderPt: 0.5,
+      });
+    }
+  }
+
+  // Draw timeline items
+  for (const row of bodyRows) {
+    for (const item of row.querySelectorAll(`.${prefix}-item`)) {
+      const itemRect = item.getBoundingClientRect();
+      const itemX = itemRect.left - tableRect.left;
+      const itemY = itemRect.top - tableRect.top;
+      const itemW = itemRect.width;
+      const itemH = itemRect.height;
+
+      const isPoint = item.classList.contains(`${prefix}-item--point`);
+      const isLabelLeft = item.classList.contains(`${prefix}-item--label-left`);
+      const colors = getItemColor(item.classList);
+      const contentElement = item.querySelector(`.${prefix}-item-content`);
+      const content = contentElement?.textContent || '';
+
+      if (isPoint) {
+        const dotSize = 0.12;
+        const labelGap = 0.04;
+        const dotX = toInchX(itemX);
+        const dotCenterY = toInchY(itemY) + toInchH(itemH) / 2;
+
+        shapes.push({
+          type: 'ellipse',
+          x: dotX,
+          y: dotCenterY - dotSize / 2,
+          w: dotSize,
+          h: dotSize,
+          fill: colors.fill,
+          border: colors.border,
+          borderPt: 1.5,
+        });
+
+        // Use row height for text box so valign: middle aligns with dot center
+        const textH = toInchH(itemH);
+        const textY = toInchY(itemY);
+        const textW = 4;
+        if (isLabelLeft) {
+          texts.push({
+            content,
+            x: dotX - textW - labelGap,
+            y: textY,
+            w: textW,
+            h: textH,
+            fontSize: 8,
+            color: '24292f',
+            valign: 'middle',
+            align: 'right',
+          });
+        } else {
+          const textX = dotX + dotSize + labelGap;
+          texts.push({
+            content,
+            x: textX,
+            y: textY,
+            w: textW,
+            h: textH,
+            fontSize: 8,
+            color: '24292f',
+            valign: 'middle',
+          });
+        }
+      } else {
+        // Box/range item
+        const labelGap = 0.04;
+        shapes.push({
+          type: 'rect',
+          x: toInchX(itemX),
+          y: toInchY(itemY),
+          w: Math.max(toInchW(itemW), 0.1),
+          h: toInchH(itemH),
+          fill: colors.fill,
+          border: colors.border,
+          borderPt: 0.75,
+          rectRadius: 0.03,
+        });
+
+        const textOutside = item.classList.contains(`${prefix}-item--text-outside`);
+
+        if (textOutside || isLabelLeft) {
+          const boxTextW = 4;
+          if (isLabelLeft) {
+            texts.push({
+              content,
+              x: toInchX(itemX) - boxTextW - labelGap,
+              y: toInchY(itemY),
+              w: boxTextW,
+              h: toInchH(itemH),
+              fontSize: 8,
+              color: '24292f',
+              valign: 'middle',
+              align: 'right',
+            });
+          } else {
+            texts.push({
+              content,
+              x: toInchX(itemX) + toInchW(itemW) + labelGap,
+              y: toInchY(itemY),
+              w: boxTextW,
+              h: toInchH(itemH),
+              fontSize: 8,
+              color: '24292f',
+              valign: 'middle',
+            });
+          }
+        } else {
+          texts.push({
+            content,
+            x: toInchX(itemX),
+            y: toInchY(itemY),
+            w: Math.max(toInchW(itemW) - 0.06, 0.1),
+            h: toInchH(itemH),
+            fontSize: 8,
+            color: 'FFFFFF',
+            valign: 'middle',
+          });
+        }
+      }
+    }
+  }
+
+  return { title, slideWidth, slideHeight, shapes, texts };
+}
+
+// ============================================================================
+// PPTX EXPORT (legacy client-side via pptxgenjs)
+// ============================================================================
 
 /**
  * Export a rendered timeline to PowerPoint using pptxgenjs.
@@ -1938,6 +2316,7 @@ export function exportTimelineToPptx(
       if (isPoint) {
         // Point item: draw circle
         const dotSize = 0.12;
+        const labelGap = 0.04;
         const dotX = toInchX(itemX);
         const dotCenterY = toInchY(itemY) + toInchH(itemH) / 2;
 
@@ -1950,15 +2329,17 @@ export function exportTimelineToPptx(
           line: { color: colors.border, pt: 1.5 },
         });
 
-        // Text next to dot - position based on label-left
+        // Use row height for text box so valign: middle aligns with dot center
+        const textH = toInchH(itemH);
+        const textY = toInchY(itemY);
         const textW = 4;
         if (isLabelLeft) {
           // Text to the left of the dot, right-aligned
           slide.addText(content, {
-            x: dotX - textW,
-            y: dotCenterY - 0.1,
+            x: dotX - textW - labelGap,
+            y: textY,
             w: textW,
-            h: 0.2,
+            h: textH,
             fontSize: 8,
             color: '24292f',
             valign: 'middle',
@@ -1966,12 +2347,12 @@ export function exportTimelineToPptx(
           });
         } else {
           // Text to the right of the dot (default)
-          const textX = dotX + dotSize;
+          const textX = dotX + dotSize + labelGap;
           slide.addText(content, {
             x: textX,
-            y: dotCenterY - 0.1,
+            y: textY,
             w: textW,
-            h: 0.2,
+            h: textH,
             fontSize: 8,
             color: '24292f',
             valign: 'middle',
@@ -1979,6 +2360,7 @@ export function exportTimelineToPptx(
         }
       } else {
         // Box/range item
+        const labelGap = 0.04;
         slide.addShape(pptx.ShapeType.rect, {
           x: toInchX(itemX),
           y: toInchY(itemY),
@@ -1997,7 +2379,7 @@ export function exportTimelineToPptx(
           if (isLabelLeft) {
             // Text to the left of the bar, right-aligned
             slide.addText(content, {
-              x: toInchX(itemX) - boxTextW,
+              x: toInchX(itemX) - boxTextW - labelGap,
               y: toInchY(itemY),
               w: boxTextW,
               h: toInchH(itemH),
@@ -2009,7 +2391,7 @@ export function exportTimelineToPptx(
           } else {
             // Text to the right of the bar (default text-outside behavior)
             slide.addText(content, {
-              x: toInchX(itemX) + toInchW(itemW),
+              x: toInchX(itemX) + toInchW(itemW) + labelGap,
               y: toInchY(itemY),
               w: boxTextW,
               h: toInchH(itemH),
@@ -2050,4 +2432,5 @@ export default {
   createResizeHandler,
   mountTimeline,
   exportTimelineToPptx,
+  extractTimelineShapes,
 };
