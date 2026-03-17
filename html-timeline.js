@@ -5,6 +5,7 @@
  * vis-timeline compatible data structures. Outputs pure HTML/CSS that
  * displays well on web and exports cleanly to PowerPoint via pptxgenjs.
  */
+import he from 'he';
 // ============================================================================
 // DATE UTILITIES
 // ============================================================================
@@ -13,7 +14,7 @@ function normalizeDate(date) {
   return new Date(date);
 }
 function daysBetween(start, end) {
-  const MS_PER_DAY = 86400000;
+  const MS_PER_DAY = 86_400_000;
   return (end.getTime() - start.getTime()) / MS_PER_DAY;
 }
 function alignToGranularity(date, granularity, weekStartDay = 0) {
@@ -486,27 +487,10 @@ function cls(prefix, ...parts) {
   return parts.map((p) => `${prefix}-${p}`).join(' ');
 }
 function escapeHtml(text) {
-  const div = typeof document === 'undefined' ? null : document.createElement('div');
-  if (div) {
-    div.textContent = text;
-    return div.innerHTML;
-  }
-  // Fallback for Node.js
-  return text
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#039;');
+  return he.escape(text);
 }
 function escapeAttribute(value) {
-  // Escape for use in HTML attributes (handles quotes and special chars)
-  return String(value)
-    .replaceAll('&', '&amp;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#039;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;');
+  return he.escape(String(value));
 }
 function renderItemBar(span, timeCells, stackDepth, prefix) {
   const { item } = span;

@@ -1,0 +1,2 @@
+scan:
+    skip-path: ["html-timeline.js", "html-timeline.d.ts"]

@@ -6,6 +6,8 @@
  * displays well on web and exports cleanly to PowerPoint via pptxgenjs.
  */
 
+import he from 'he';
+
 // ============================================================================
 // TYPES AND INTERFACES
 // ============================================================================
@@ -790,28 +792,11 @@ function cls(prefix: string, ...parts: string[]): string {
 }
 
 function escapeHtml(text: string): string {
-  const div = typeof document === 'undefined' ? null : document.createElement('div');
-  if (div) {
-    div.textContent = text;
-    return div.innerHTML;
-  }
-  // Fallback for Node.js
-  return text
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#039;');
+  return he.escape(text);
 }
 
 function escapeAttribute(value: string | number): string {
-  // Escape for use in HTML attributes (handles quotes and special chars)
-  return String(value)
-    .replaceAll('&', '&amp;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#039;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;');
+  return he.escape(String(value));
 }
 
 function renderItemBar(
