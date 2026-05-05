@@ -524,8 +524,8 @@ function renderItemBar(span, timeCells, stackDepth, prefix) {
   }
   // Calculate vertical position based on stack row
   // Each stack row gets a fixed height slot
-  const itemHeight = 24; // Fixed pixel height per item slot
-  const top = span.stackRow * (itemHeight + 4) + 4; // 4px gap between items
+  const itemHeight = 12; // Fixed pixel height per item slot
+  const top = span.stackRow * (itemHeight + 2) + 2; // 2px gap between items
   const styles = [`left: ${left.toFixed(1)}%`, `width: ${width.toFixed(1)}%`, `top: ${top}px`];
   // Point items use fixed size, range items use calculated height
   if (!item.isPoint) {
@@ -593,8 +593,8 @@ function renderGroupRow(group, spans, timeCells, options, rowIndex, timelineWidt
   for (let index = 0; index < timeCells.length; index++) {
     cells += renderCell(allSpans, index, timeCells, stackDepth, prefix);
   }
-  // Calculate row height: 28px per stack row (24px item + 4px gap) + 8px padding
-  const rowHeight = stackDepth * 28 + 8;
+  // Calculate row height: 14px per stack row (12px item + 2px gap) + 4px padding
+  const rowHeight = stackDepth * 14 + 4;
   const rowStyle = ` style="height: ${rowHeight}px"`;
   return `<tr class="${rowClass}" data-group-id="${escapeAttribute(group.id)}"${rowStyle}>${cells}</tr>`;
 }
@@ -866,7 +866,7 @@ export function getTimelineStyles(prefix = 'tl') {
 
 /* Rows */
 .${prefix}-row {
-  height: 40px;
+  height: 20px;
 }
 
 .${prefix}-row--even {
@@ -890,7 +890,7 @@ export function getTimelineStyles(prefix = 'tl') {
   position: relative;
   width: 100%;
   height: 100%;
-  min-height: 36px;
+  min-height: 18px;
 }
 
 /* Items */
@@ -919,24 +919,24 @@ export function getTimelineStyles(prefix = 'tl') {
 }
 
 .${prefix}-item--point {
-  height: 20px !important;
+  height: 12px !important;
   background: transparent !important;
   border: none !important;
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
   overflow: visible !important;
   white-space: nowrap;
 }
 
 .${prefix}-item--point::before {
   content: '';
-  width: 10px;
-  height: 10px;
-  min-width: 10px;
+  width: 6px;
+  height: 6px;
+  min-width: 6px;
   border-radius: 50%;
   background-color: #cf222e;
-  border: 2px solid #a40e26;
+  border: 1px solid #a40e26;
   flex-shrink: 0;
   box-sizing: border-box;
 }
@@ -959,14 +959,14 @@ export function getTimelineStyles(prefix = 'tl') {
 /* Item Content */
 .${prefix}-item-content {
   display: block;
-  padding: 2px 8px;
+  padding: 0 4px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   color: #ffffff;
-  font-size: 11px;
+  font-size: 9px;
   font-weight: 500;
-  line-height: 1.4;
+  line-height: 1.2;
 }
 
 /* Box/Range items where text doesn't fit: move text outside to the right */
